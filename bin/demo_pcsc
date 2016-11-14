@@ -1,0 +1,442 @@
+#!/usr/bin/env perl
+use Socket;
+use IO::Socket;
+use IO::Select;
+use threads;
+use threads::shared;
+use Chipcard::PCSC;
+use Chipcard::PCSC::Card;
+use Data::Dumper;
+use constant BUFSIZE => 1024;
+
+use strict;
+local $| = 1;
+my $flag_card_present: shared;
+$flag_card_present = 0;
+
+my $verbose = 0;
+
+
+
+my $select = IO::Select->new();
+
+
+my $pcsc = new Chipcard::PCSC();
+die ("Can't create the pcsc object: $Chipcard::PCSC::errno\n") unless (defined $pcsc);
+
+my @ReadersList = $pcsc->ListReaders ();
+die ("Can't get readers' list: $Chipcard::PCSC::errno\n") unless (defined($ReadersList[0]));
+my $reader = $ReadersList[0];
+print STDERR $reader . "\n";
+my @readers_states;
+# create the list or readers to watch
+map { push @readers_states, ({'reader_name'=>"$_"}) } @ReadersList;	
+# Set up the pcsc thread
+my($pcsc_read,$pcsc_write);
+socketpair($pcsc_read,$pcsc_write,AF_UNIX,SOCK_STREAM,PF_UNSPEC)
+    or die "socketpair failed: $!";
+
+my $pcsc_thread = threads->create('monitor_pcsc',$pcsc,$reader,\@readers_states, $pcsc_write) or die "Couldn't create monitor_serial thread: $!\n";
+$select->add($pcsc_read);
+
+
+$select->add(\*STDIN);
+
+print prompt();
+#-----------------------------------
+# MAIN loop
+#-----------------------------------
+while(1)
+{	
+	my @ready=$select->can_read(1); #timeout = 1sec
+	foreach my $fh (@ready)
+    {
+
+		if ($fh eq \*STDIN) {
+			# Data from stdin
+			chomp(my $data = <STDIN>);
+			
+			foreach my $line (split_lines($data)){
+			#				print $line . "\n";
+				my $user_input = parse_local_input($line);
+				
+				#print $user_input, "\n";
+				if ($user_input =~ /\!/) {
+					#print "That was ($`) ($&) ($')\n";
+					if ($` ne "" || $' ne "") {	
+						my $data = trim(trim($`) . " " . trim($'));
+						pcsc_write_data($pcsc, $reader, $data);
+					}
+				} else {
+					local_input($user_input);
+				}
+			}
+			
+			#print STDERR "Got '$data' from STDIN\n";
+
+			print prompt();
+		} elsif ($fh eq $pcsc_read) {
+		    # Data from the pcsc thread
+		    my $data;
+		    sysread($pcsc_read,$data,BUFSIZE) or die "Read from PCSC thread failed.\n";
+			print STDERR "Got '$data' from PCSC\n" if $verbose;			
+			foreach my $line (split_lines($data)){
+				print STDERR $line . "\n";
+#				my $user_input = parse_local_input($line);
+#				local_input($user_input);			
+			}
+			print prompt();			
+		} else {
+			print STDERR "other\n";
+		}
+	}
+}
+
+sub prompt {
+	my $pt = "";
+	if ($flag_card_present){
+		$pt = $pt . "[card present]";
+	}
+	$pt = $pt . "# ";
+	
+	return $pt;
+}
+
+sub diag {
+	my $msg = shift;
+	print($msg . "\n");
+}
+
+sub ok {
+	my ($b,$s) = @_;
+	if ($b){
+		print "ok " . $s . "\n";
+	} else {
+		print "ng " . $s . "\n";
+	}
+}
+
+sub trim {
+	my $string = shift;
+	$string =~ s/^\s*(.*?)\s*$/$1/;
+	return $string;
+}
+
+sub split_lines {
+	my $input = shift;
+	my @cmds;
+	foreach my $line (split /\r\n/, $input){
+		foreach my $cmd (split /;/, $line){
+			push(@cmds,trim($cmd)); 
+		}
+	}
+	return @cmds;	
+}
+
+sub switch_write_mode {
+	my $input = shift;
+#	print "switch write mode\n";
+#	print "input:$input\n";
+	if ($input =~ /\@pcsc/) {
+		print "That was ($`) ($&) ($')\n";
+		#$socket_write = socket_up($host, $1);
+		#if ( !is_socket_writeable() ) {
+		#	print STDERR "Connection refused.\n";
+		#} els
+		if ($` ne "" || $' ne "") {	
+			my $data = trim(trim($`) . " " . trim($'));
+			write_pcsc($data);
+			#send_remote($remote_cmd);
+			#socket_down($socket_write);
+		}
+	}
+	return "";	
+}
+
+sub parse_local_input {
+	my $input = shift;
+	
+	if ($input eq 'scan') {
+	  	return "";
+     } elsif ($input eq 'type') {
+	    return "";
+     } elsif (($input eq 'exit') || ($input eq 'quit')) {
+       exit;
+    } elsif ($input =~ /^\</) {
+		return switch_read_mode($input);
+	} elsif ($input =~ /\@/) {
+		return switch_write_mode($input);
+	} else {
+		return $input;
+	}
+}
+
+
+sub local_input {
+	my $input = shift;
+	
+	
+	return if ($input eq "");
+}
+
+sub monitor_pcsc
+{
+    my($hContext, $reader, $readers_states, $sock)=@_;
+	my $timeout = 100;
+	my $current_state;
+	my $event_state;
+	
+	while(1){
+		my @StatusResult = $hContext->GetStatusChange($readers_states, $timeout);
+		$current_state = $readers_states[0]{'current_state'};
+		$event_state = $readers_states[0]{'event_state'};
+		
+		if ($current_state != $event_state){
+			print("    state changed\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_CHANGED && $verbose);
+			print("    card present\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_PRESENT && $verbose);
+			print("    card absent\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_EMPTY && $verbose);
+			print("    card mute\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_MUTE && $verbose);
+
+			if ($event_state & $Chipcard::PCSC::SCARD_STATE_PRESENT){
+				$flag_card_present = 1;
+				print "monitor_pcsc\n" if ($verbose);
+				print("  ATR: " . Chipcard::PCSC::array_to_ascii($readers_states[0]{'ATR'}) . "\n") if (defined $readers_states[0]{'ATR'} && $verbose);
+				#my $buf = Chipcard::PCSC::array_to_ascii($readers_states[0]{'ATR'});
+				#print STDERR "\nCard inserted\n";
+				#print prompt();
+				eval {
+					my $buf = pcsc_get_data($hContext,$reader);				
+					syswrite($sock,$buf) or die "Couldn't write to socket: $!\n";				
+				};
+				if($@){
+					print "ERROR: $@"
+			  	}
+			}
+
+			if ($event_state & $Chipcard::PCSC::SCARD_STATE_EMPTY){
+				$flag_card_present = 0;
+				#print STDERR "\n";
+				my $buf = "card absent";
+				syswrite($sock,$buf) or die "Couldn't write to socket: $!\n";
+				#print STDERR "No Card\n";
+				#print prompt();					
+			}
+			$readers_states[0]{'current_state'} = $event_state;			
+		}
+		#$readers_states[0]{current_state} = $event_state;
+	}	
+	
+#    $data;
+}
+
+sub pcsc_readBytes
+{
+	my($hCard, $address) = @_;
+	return if (!$flag_card_present);
+	
+	my @alpha_num = ($address);
+	my $SendData = Chipcard::PCSC::ascii_to_array ("FF B0 00 " . Chipcard::PCSC::array_to_ascii (\@alpha_num) . " 00");
+	my $RecvData = $hCard->Transmit($SendData);
+	die ("Can't transmit data: $Chipcard::PCSC::errno") unless (defined ($RecvData));
+	my @sw; 
+	push(@sw, pop(@{$RecvData}));
+	push(@sw, pop(@{$RecvData}));
+	@sw = reverse(@sw);
+	my $sw = Chipcard::PCSC::array_to_ascii (\@sw);
+	my $data = "";
+	if ($sw eq "90 00"){
+#		my $str = pack "C*", @{$RecvData};
+#		$data = $str;
+		return @{$RecvData};
+	} else {
+		diag("sw: " . &Chipcard::PCSC::Card::ISO7816Error($sw));
+	}
+#	return $data;
+}
+
+sub pcsc_writeBytes
+{
+	my($hCard, $address, $data) = @_;
+	return if (!$flag_card_present);
+	
+	my @alpha_num = ($address);
+	
+	my $SendData = Chipcard::PCSC::ascii_to_array ("FF D6 00 " . Chipcard::PCSC::array_to_ascii (\@alpha_num) . " 04 " . Chipcard::PCSC::array_to_ascii ($data));
+#	print Chipcard::PCSC::array_to_ascii ($SendData), "\n";
+	my $RecvData = $hCard->Transmit($SendData);
+	die ("Can't transmit data: $Chipcard::PCSC::errno") unless (defined ($RecvData));
+	my @sw; 
+	push(@sw, pop(@{$RecvData}));
+	push(@sw, pop(@{$RecvData}));
+	@sw = reverse(@sw);
+	my $sw = Chipcard::PCSC::array_to_ascii (\@sw);
+	my $data = "";
+	if ($sw eq "90 00"){
+		return 1;
+	} else {
+		diag("sw: " . &Chipcard::PCSC::Card::ISO7816Error($sw));
+	}
+}
+
+sub pcsc_write_data {
+	my ($hContext, $reader, $data) = @_;
+	return if (!$flag_card_present);
+	
+	print STDERR "Are you sure you want to write a data |$data| on Smart Card? (y/n [n]) ";
+	my $user_input =  <STDIN>;
+    print STDERR "you typed '$user_input'\n" if $verbose;
+    if (substr($user_input,0,1) ne 'y'){
+      print STDERR "To write a data on Smart Card was canceled.\n";
+      return "";
+    }
+
+#	pcsc_clear_data($hContext, $reader);
+	my $hCard = new Chipcard::PCSC::Card ($hContext);
+	die ("Can't create the reader object: $Chipcard::PCSC::errno\n") unless (defined($hCard));
+
+	my $tmpVal = $hCard->Connect($reader, $Chipcard::PCSC::SCARD_SHARE_SHARED);
+	unless ($tmpVal) {
+		$tmpVal = $hCard->Reconnect ($Chipcard::PCSC::SCARD_SHARE_SHARED, $Chipcard::PCSC::SCARD_PROTOCOL_T0, $Chipcard::PCSC::SCARD_RESET_CARD);
+		die ("Can't reconnect to the reader '$reader': $Chipcard::PCSC::errno\n") unless ($tmpVal);
+	}
+		
+	my @StatusResult = $hCard->Status();
+	die ("Can't get status: $Chipcard::PCSC::errno\n") unless ($StatusResult[0]);
+	#-------------------------------------------------------------------------------
+	print "begin transaction (write data)\n" if ($verbose);
+	die ("Can't initiate transaction: $Chipcard::PCSC::errno\n") unless ($hCard->BeginTransaction());
+		
+	my @codes = unpack "C*", $data;
+		
+	foreach my $a ((4..15)){
+		my @array = (0) x 4;
+		foreach (0..$#array) {	
+			my $code = shift @codes;
+			if ($code){
+				$array[$_] = $code;
+			}
+		}
+		pcsc_writeBytes($hCard,$a,\@array);
+	}
+		
+	die ("Can't terminate transaction: $Chipcard::PCSC::errno\n") unless ($hCard->EndTransaction($Chipcard::PCSC::SCARD_LEAVE_CARD));
+	print "end transaction (write data)\n" if ($verbose);
+	$tmpVal = $hCard->Disconnect($Chipcard::PCSC::SCARD_LEAVE_CARD);
+	die ("Can't disconnect the Chipcard::PCSC object: $Chipcard::PCSC::errno\n") unless $tmpVal;
+	$hCard = undef;
+}
+
+sub pcsc_clear_data
+{
+	my($hContext, $reader)=@_;
+	return if (!$flag_card_present);
+	
+#	my @StatusResult = $hContext->GetStatusChange(\@readers_states, 100);
+#	my $event_state = $readers_states[0]{'event_state'};
+#	print("    state changed\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_CHANGED && $verbose);
+#	print("    card present\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_PRESENT && $verbose);
+#	print("    card absent\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_EMPTY && $verbose);
+#	print("    card mute\n") if ($event_state & $Chipcard::PCSC::SCARD_STATE_MUTE && $verbose);
+#	if ($event_state & $Chipcard::PCSC::SCARD_STATE_PRESENT){
+		#print("reading...\n");
+		#print("Connecting to the card:\n");
+		my $hCard = new Chipcard::PCSC::Card ($hContext);
+		die ("Can't create the reader object: $Chipcard::PCSC::errno\n") unless (defined($hCard));
+
+		my $tmpVal = $hCard->Connect($reader, $Chipcard::PCSC::SCARD_SHARE_SHARED);
+		unless ($tmpVal) {
+			# Try to reconnect and reset if connect fails
+			#print("Connect failed: trying to reset the card:");
+			$tmpVal = $hCard->Reconnect ($Chipcard::PCSC::SCARD_SHARE_SHARED, $Chipcard::PCSC::SCARD_PROTOCOL_T0, $Chipcard::PCSC::SCARD_RESET_CARD);
+			die ("Can't reconnect to the reader '$reader': $Chipcard::PCSC::errno\n") unless ($tmpVal);
+		}
+		
+		#print("Getting status:\n");
+		my @StatusResult = $hCard->Status();
+		die ("Can't get status: $Chipcard::PCSC::errno\n") unless ($StatusResult[0]);
+		#print("Reader name is $StatusResult[0]\n");
+		#print("State: $StatusResult[1]\n");
+		#print("Current protocol: $StatusResult[2]\n");
+		#print("ATR: " . Chipcard::PCSC::array_to_ascii ($StatusResult[3]) . "\n");
+		
+		#-------------------------------------------------------------------------------
+		#diag("Initiating transaction:");
+		die ("Can't initiate transaction: $Chipcard::PCSC::errno\n") unless ($hCard->BeginTransaction());
+		#diag($hCard->BeginTransaction(), "\$hCard->BeginTransaction()");
+		
+		my @bytes;
+		foreach my $a ((4..15)){
+			my @array = (0) x 4;
+			my @rcv = pcsc_writeBytes($hCard,$a,\@array);
+			push @bytes, @rcv;
+		}
+		
+		#print @bytes, "\n";
+		my $data = pack "C*", @bytes;
+		#print "[" . $data, "]\n";
+		#-------------------------------------------------------------------------------
+		#diag("Ending transaction:");
+		die ("Can't terminate transaction: $Chipcard::PCSC::errno\n") unless ($hCard->EndTransaction($Chipcard::PCSC::SCARD_LEAVE_CARD));
+		#ok($hCard->EndTransaction($Chipcard::PCSC::SCARD_LEAVE_CARD),
+		#	"\$hCard->EndTransaction($Chipcard::PCSC::SCARD_LEAVE_CARD)");
+
+		#-------------------------------------------------------------------------------
+		#diag("Disconnecting the card:");
+		$tmpVal = $hCard->Disconnect($Chipcard::PCSC::SCARD_LEAVE_CARD);
+		die ("Can't disconnect the Chipcard::PCSC object: $Chipcard::PCSC::errno\n") unless $tmpVal;
+		#ok($tmpVal, "\$hCard->Disconnect");
+
+		#-------------------------------------------------------------------------------
+		#diag("Closing card object:");
+		$hCard = undef;
+		return $data;
+#	}
+	
+}
+
+
+sub pcsc_get_data
+{
+	my($hContext, $reader)=@_;
+	return if (!$flag_card_present);
+
+	print "pcsc_get_data\n" if ($verbose);	
+	my $hCard = new Chipcard::PCSC::Card ($hContext);
+	die ("Can't create the reader object: $Chipcard::PCSC::errno\n") unless (defined($hCard));
+
+	my $tmpVal = $hCard->Connect($reader, $Chipcard::PCSC::SCARD_SHARE_SHARED);
+	unless ($tmpVal) {
+		# Try to reconnect and reset if connect fails
+		$tmpVal = $hCard->Reconnect ($Chipcard::PCSC::SCARD_SHARE_SHARED, $Chipcard::PCSC::SCARD_PROTOCOL_T0, $Chipcard::PCSC::SCARD_RESET_CARD);
+		die ("Can't reconnect to the reader '$reader': $Chipcard::PCSC::errno\n") unless ($tmpVal);
+	}
+		
+	#print("Getting status:\n");
+	my @StatusResult = $hCard->Status();
+	die ("Can't get status: $Chipcard::PCSC::errno\n") unless ($StatusResult[0]);
+	#print("Reader name is $StatusResult[0]\n");
+	#print("State: $StatusResult[1]\n");
+	#print("Current protocol: $StatusResult[2]\n");
+	#print("ATR: " . Chipcard::PCSC::array_to_ascii ($StatusResult[3]) . "\n");		
+	#-------------------------------------------------------------------------------
+	diag("Initiating transaction:") if ($verbose);
+	die ("Can't initiate transaction: $Chipcard::PCSC::errno\n") unless ($hCard->BeginTransaction());
+	
+	my @bytes;
+	foreach my $a ((4..15)){
+		my @rcv = pcsc_readBytes($hCard,$a);
+		push @bytes, @rcv;
+	}
+		
+	my $data = pack "C*", @bytes;
+	#-------------------------------------------------------------------------------
+	diag("Ending transaction:") if ($verbose);
+	die ("Can't terminate transaction: $Chipcard::PCSC::errno\n") unless ($hCard->EndTransaction($Chipcard::PCSC::SCARD_LEAVE_CARD));
+	#-------------------------------------------------------------------------------
+	$tmpVal = $hCard->Disconnect($Chipcard::PCSC::SCARD_LEAVE_CARD);
+	die ("Can't disconnect the Chipcard::PCSC object: $Chipcard::PCSC::errno\n") unless $tmpVal;
+	#-------------------------------------------------------------------------------
+	diag("Closing card object:") if ($verbose);
+	$hCard = undef;
+	return $data;
+}
