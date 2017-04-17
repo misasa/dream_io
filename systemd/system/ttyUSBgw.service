@@ -1,0 +1,10 @@
+[Unit]
+Description = ttyUSB Gateway Service
+
+[Service]
+ExecStart = /usr/local/bin/jerm -D -P 2001 -b 9600 /dev/ttyUSB0
+Restart = always
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
