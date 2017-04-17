@@ -1,6 +1,6 @@
 [Unit]
-Description=RFComm gateway 
-#BindTo=dev-rfcomm0.device
+Description=Gateway RFComm0 Service 
+BindTo=dev-rfcomm0.device
 After=dev-rfcomm0.device
 
 [Service]

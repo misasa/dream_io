@@ -1,9 +1,10 @@
 [Unit]
-Description = ttyUSB Gateway Service
-
+Description = Gateway ttyUSB0 Service
+BindTo = dev-ttyUSB0.device
+After = dev-ttyUSB0.device
 [Service]
 ExecStart = /usr/local/bin/jerm -D -P 2001 -b 9600 /dev/ttyUSB0
-Restart = always
+Restart = no
 Type = simple
 
 [Install]

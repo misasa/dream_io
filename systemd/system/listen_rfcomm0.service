@@ -1,5 +1,5 @@
 [Unit]
-Description = RFComm Service
+Description = Listen RFComm0 Service
 After=bluetooth.service
 Requires=bluetooth.service
 [Service]
