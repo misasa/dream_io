@@ -1,0 +1,137 @@
+#!/usr/bin/env ruby
+require "yaml"
+require "optparse"
+require "uri"
+require "active_resource"
+require "logger"
+require "medusa_rest_client"
+# require 'serialport'
+require 'rubyserial'
+require 'socket'
+
+require 'win32/sound' # gem install win32-sound
+include Win32
+STDOUT.sync = true
+
+include MedusaRestClient
+Base.init
+
+class Base < ActiveResource::Base
+  my_file       = File.expand_path("~/.orochirc")
+  raise("Config file |#{my_file}| is missing. Have it properly.") if !File.exist?my_file
+  my_config     = YAML.load_file(my_file)
+  $log_file     = my_config['log_file']
+  if $log_file.blank?
+    # print "Configuration file |#{my_file}| does not have parameter |log_file|. Put a line such like |log_file: /cygdrive/c/Users/dream/scan.log|."
+    $log_file = File.join(ENV['HOME'],"scan.log")
+  end
+  if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
+    win_path   = $log_file.gsub(/\/cygdrive\/c\/Users/,"C:/Users")
+    win_path   = win_path.gsub!(/\//,"\\")
+    $log_file  = win_path
+  end
+  $log         = Logger.new($log_file)
+  $dream_io = my_config['dream_io']
+  $medusa_uri  = my_config['uri']
+  $default_box = my_config['default_box']
+  if $dream_io.blank?
+    raise "Config file |#{my_file}| does not have parameter |dream_io|.  Put a line such like |dream_io: 172.24.1.130|."
+  end
+end
+
+opts = OptionParser.new do |opt|
+  OPTS = {}
+  opt.banner = <<"EOS"
+NAME
+    #{File.basename($0, '.*')} - Quantify a stone
+
+SYNOPSIS AND USAGE
+    ruby -S #{File.basename($0, '.*')} [options]
+
+DESCRIPTION
+    Quantify a stone.  You scan each stone to be quantified.
+
+EXAMPLE OF ~/.orochirc
+    ---
+    uri: dream.misasa.okayama-u.ac.jp/demo
+    user: admin
+    password: admin
+    dream_io: 172.24.1.130
+
+SEE ALSO
+    gem install win32-sound
+    curl
+    stones
+    tepra-duplicate (Ruby script)
+    orochi-label
+    http://dream.misasa.okayama-u.ac.jp
+
+IMPLEMENTATION
+    Godigo, version 1333
+    Copyright (C) 2015-2017 Okayama University
+    License GPLv3+: GNU GPL version 3 or later
+
+HISTORY
+    April 17, 2017: First release by YY
+
+ARGUMENTS AND OPTIONS
+EOS
+  opt.on("-v", "--[no-]verbose", "Run verbosely") {|v| OPTS[:verbose] = v}
+end
+opts.parse!
+
+port_barcode = 7000
+port_scale = 2001
+
+def open_by_web_browser(medusa_id)
+  # url = "http://dream.misasa.okayama-u.ac.jp/?q=#{id}"
+  url = "https://#{$medusa_uri}/records/#{medusa_id}"
+  if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/
+    system("start #{url}")
+  elsif RUBY_PLATFORM.downcase =~ /cygwin/
+    system("cygstart #{url}")
+  elsif RUBY_PLATFORM.downcase =~ /darwin/
+    system("open #{url}")
+  else
+    raise
+  end
+end
+
+def get_quantity(port_scale)
+  begin
+    pq = TCPSocket.open($dream_io,port_scale)
+  rescue
+    puts "TCPSocket open failed. #{$dream_io} #{port_scale}"
+  else
+    pq.puts "S"
+    line = pq.gets
+    pq.close
+    token = line.split
+    if token.size == 4
+      return [token[2],token[3]]
+    end
+  end
+end
+
+
+begin
+  pb = TCPSocket.open($dream_io,port_barcode)
+rescue
+  puts "TCPSocket.open failed: #{$dream_io} #{port_barcode}"
+else
+  loop do
+    print "Place stone on the scale and scan stone> "
+    line = pb.gets
+    my_input = line.chomp
+    print "#{my_input} "
+    obj = Record.find_by_id_or_path(my_input)
+    print "#{obj.name} "
+    weight, unit = get_quantity(port_scale)
+    obj.quantity = weight
+    obj.quantity_unit = unit
+    print "#{weight} #{unit} "
+    obj.save
+    print " OK\n"
+    open_by_web_browser(my_input)
+  end
+end
