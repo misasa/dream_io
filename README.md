@@ -40,9 +40,10 @@ Three services are involved.
     Codename:       jessie
     $ git clone https://github.com/misasa/dream_io
     $ cd dream_io
-    $ sudo cp ./systemd/system/listen_rfcomm0.service
-    $ sudo cp ./systemd/system/gateway_rfcomm0.service
-    $ sudo cp ./systemd/system/geteway_ttyUSB0.service
+    $ sudo cp ./udev/rules.d/rfcomm.rules /etc/udev/rurles.d/
+    $ sudo cp ./systemd/system/listen_rfcomm0.service /etc/systemd/system/
+    $ sudo cp ./systemd/system/gateway_rfcomm0.service /etc/systemd/system/
+    $ sudo cp ./systemd/system/geteway_ttyUSB0.service /etc/systemd/system/
     $ sudo systemctl enable listen_rfcomm0.service
     $ sudo systemctl enable gateway_rfcomm0.service
     $ sudo systemctl enable tageway_ttyUSB0.service
