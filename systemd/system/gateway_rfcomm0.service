@@ -5,7 +5,7 @@ After=dev-rfcomm0.device
 
 [Service]
 ExecStart=/usr/local/bin/jerm -D -P 2002 -b 9600 /dev/rfcomm0
-Restart=no
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
