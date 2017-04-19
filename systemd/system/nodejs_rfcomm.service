@@ -1,0 +1,13 @@
+[Unit]
+Description = NodeJS RFComm Service
+After=bluetooth.service
+Requires=bluetooth.service
+[Service]
+WorkingDirectory=/srv/nodejs
+ExecStart = /usr/bin/node rfcomm.js -p 2002
+Restart = always
+RestartSec = 10
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
