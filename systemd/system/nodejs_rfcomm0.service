@@ -1,0 +1,14 @@
+[Unit]
+Description = NodeJS rfcomm0 Service
+BindTo = dev-rfcomm0.device
+After = dev-rfcomm0.device
+
+[Service]
+WorkingDirectory = /srv/nodejs
+ExecStart = /usr/bin/node serial.js -d /dev/rfcomm0 -p 2002
+Restart = on-failure
+RestartSec = 10
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
