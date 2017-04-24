@@ -1,0 +1,13 @@
+[Unit]
+Description = NodeJS ttyUSB0 Service
+BindTo = dev-ttyUSB0.device
+After = dev-ttyUSB0.device
+[Service]
+WorkingDirectory = /srv/nodejs
+ExecStart = /usr/bin/node serial.js -d /dev/ttyUSB0 -p 2001
+Restart = always
+RestartSec = 10
+Type = simple
+
+[Install]
+WantedBy = multi-user.target

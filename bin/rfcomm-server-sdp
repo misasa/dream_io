@@ -26,19 +26,20 @@ class echoThread(threading.Thread):
                 buffer = buffer + data
                 if re.search(r'\n', buffer):
                     chunk = buffer.rstrip()
-                    print self.client_info, self.tcp_port, ": received [%s]" % chunk
+                    print self.client_info, ": received [%s]" % chunk
+                    #print self.client_info, self.tcp_port, ": received [%s]" % chunk
                     self.tcp_socket.send(chunk + '\r\n')
                     buffer = ''
         except IOError:
             pass
         self.sock.close()
-        self.tcp_socket.close()
+        #self.tcp_socket.close()
         print self.client_info, ": disconnected"
         
 
 
 class server(threading.Thread):
-    def __init__(self):
+    def __init__(self, tcp_port):
         sys.path.insert(0,os.getcwd())
 
         name = "BluetoothChat"
@@ -53,6 +54,7 @@ class server(threading.Thread):
         print "Waiting for connection on RFCOMM channel %d" % port
         threading.Thread.__init__(self)
         self.setDaemon(True)
+	self.tcp_port = tcp_port
         self.i = 0
         self.server_sock = server_sock
 
@@ -62,15 +64,20 @@ class server(threading.Thread):
             client_sock, client_info = self.server_sock.accept()
             print client_info, ": connection accepted"
 	    bt_address = re.sub(':','',client_info[0]);
-            tcp_port =7000 
+            #tcp_port =7000 
 	    tcp_address = socket.gethostbyname('localhost') 
-            print tcp_address, tcp_port, ": connecting ..."
-            echo = echoThread(client_sock, client_info, tcp_address, tcp_port)
+            #print tcp_address, tcp_port, ": connecting ..."
+            echo = echoThread(client_sock, client_info, tcp_address, self.tcp_port)
             echo.setDaemon(True)
             echo.start()
 
 if __name__ == '__main__':
-    cr = server()
+    if (len(sys.argv) != 2):
+      print 'Usage: # rfcomm-server-sdp 7000'
+      quit()
+
+    port = int(sys.argv[1])
+    cr = server(port)
     cr.start()
     time.sleep(30000)
 

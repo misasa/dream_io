@@ -1,0 +1,11 @@
+[Unit]
+Description=Gateway RFComm0 Service 
+BindTo=dev-rfcomm0.device
+After=dev-rfcomm0.device
+
+[Service]
+ExecStart=/usr/local/bin/jerm -D -P 2002 -b 9600 /dev/rfcomm0
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

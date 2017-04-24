@@ -1,0 +1,11 @@
+[Unit]
+Description = Listen RFComm0 Service
+After=bluetooth.service
+Requires=bluetooth.service
+[Service]
+ExecStart = /usr/bin/rfcomm listen /dev/rfcomm0
+Restart = always
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
