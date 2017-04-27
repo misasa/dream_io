@@ -1,0 +1,10 @@
+config:
+  pubnub:
+    publishKey: "demo"
+    subscribeKey: "demo"
+  medusa:
+    url: "http://dream.misasa.okayama-u.ac.jp/demo/"
+    auth:
+      user: "admin"
+      password "admin"
+
