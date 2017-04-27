@@ -1,9 +1,9 @@
 [Unit]
-Description = DREAM I/O Service
+Description = Weigh Console Service
 After=syslog.target network.target
 [Service]
 WorkingDirectory=/srv/nodejs
-ExecStart = /usr/bin/node dream-io.js
+ExecStart = /usr/bin/node weigh_console.js
 Restart = always
 RestartSec = 10
 Type = simple
