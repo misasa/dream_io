@@ -23,7 +23,10 @@ serial.on('data', function(data){
   console.log('data: [' + data.toString() + ']');
   io.emit('chat message',data.toString());
 });
-
+serial.on('close', function(){
+  console.log('serial port closed!');
+  process.exit(1);
+});
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.on('disconnect', function(){
