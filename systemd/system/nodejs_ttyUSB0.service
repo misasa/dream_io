@@ -4,9 +4,9 @@ BindTo = dev-ttyUSB0.device
 After = dev-ttyUSB0.device
 [Service]
 WorkingDirectory = /srv/nodejs
-ExecStart = /usr/bin/node serial.js -d /dev/ttyUSB0 -p 2001
+ExecStart = /usr/bin/node pub_serial.js -d /dev/ttyUSB0 -c hello_world
 Restart = always
-RestartSec = 10
+RestartSec = 5
 Type = simple
 
 [Install]
