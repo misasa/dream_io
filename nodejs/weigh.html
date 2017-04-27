@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>DREAM I/O</title>
+    <title>METTLER TOLEDO</title>
     <style>
      * { margin: 0; padding: 0; box-sizing: border-box; }
      body { font: 13px Helvetica, Arial; }
@@ -11,10 +11,10 @@
    </style>
   </head>
   <body>
-    <h1>DREAM I/O weigh</h1>
+    <h1>METTLER TOLEDO</h1>
     <div id="status"></div>
     <form action="">
-      <button>Reset</button>
+      <button>Start</button>
     </form>
     <ul id="messages"></ul>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
@@ -30,7 +30,7 @@
          message: function(message) {
 	   obj = message.message;
 	   console.log("New Message!!", obj);
-	   line = obj.id + " " + obj.name + " " + obj.weight + obj.weight_unit;
+	   line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
 	   $('#messages').append($('<li>').text(line))
 	 }
        })

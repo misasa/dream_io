@@ -1,0 +1,13 @@
+[Unit]
+Description = DREAM I/O Weigh Service
+After=bluetooth.service
+Requires=bluetooth.service
+[Service]
+WorkingDirectory=/srv/nodejs
+ExecStart = /usr/bin/node weigh.js -c weigh
+Restart = always
+RestartSec = 10
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
