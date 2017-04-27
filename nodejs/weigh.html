@@ -12,7 +12,8 @@
   </head>
   <body>
     <h1>DREAM I/O weigh</h1>
-    <form method="post" action="/reset">
+    <div id="status"></div>
+    <form action="">
       <button>Reset</button>
     </form>
     <ul id="messages"></ul>
@@ -38,9 +39,8 @@
          channels: ['weigh']
        });
        $('form').submit(function(){
-         console.log('b pushed');
-	 $.post('/reset');
-	 return false;
+         $.post('/reset');
+	 $('#status').text('restarting dream-io. please reload this page after while.');
        });
     </script>
   </body>
