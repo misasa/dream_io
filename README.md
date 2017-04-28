@@ -5,16 +5,19 @@ dream_io
 Specimen-ID is delivered from barcode reader to Medusa via following
 path.
 
-- CR 2600 (barcode reader) <Bluetooth> DREAM I/O (listen_rfcomm0)
-- DREAM I/O (gateway_rfcomm0) <TCP/IP> PC (weigh)
-- PC (weigh) <TCP/IP> Medusa
+- CR 2600 (barcode reader) <Bluetooth> DREAM I/O (weigh.js)
+- DREAM I/O (weigh.js) <TCP/IP> Medusa
 
 Quantity of the specimen is delivered from balance to Medusa via
 following path.
 
 - MS 16002S (balance) <RS232C/USB> DREAM I/O
-- DREAM I/O (gateway_ttyUSB0) <TCP/IP> PC (weight)
-- PC (weight) <TCP/IP> Medusa
+- DREAM I/O (weigh.js) <TCP/IP> Medusa
+
+The process can be monitored by web server that runs on DREAM I/O.
+This interface lets user reset the DREAM I/O.
+
+- DREAM I/O (weigh_consle.js)
 
 # Configuration
 
@@ -24,14 +27,11 @@ following path.
 
 ## DREAM I/O
 
-Three services are involved.
+Listen to two devices.
 
-- listen_rfcomm0: Receive specimen-ID from barcode reader via
-  bluetooth.
-- gateway_rfcomm0: Write the specimen-ID to TCP/IP port (2002 as of
-  April 18, 2017).
-- gateway_ttyUSB0: Relay communication between RS232C and TCP/IP port
-  (2001 as of April 18, 2017).
+- listen `rfcomm0': Receive specimen-ID from barcode reader via
+  Bluetooth.
+- listen `ttyUSB0': Receive weight from balance via RS232C.
 
 ### Instalation
     $ lsb_release -a
@@ -52,25 +52,10 @@ Three services are involved.
     $ sudo systemctl start gateway_rfcomm0.service
     $ sudo systemctl start gateway_ttyUSB0.service
 
-## PC (weigh)
+# Operation manual
 
-Revise configuration file "~/.orochirc" to include following line.
-
-    ### Medusa server
-    uri: dream.misasa.okayama-u.ac.jp/demo
-    user: admin
-    password: admin
-    
-    ## DREAM I/O
-    dream_io: 172.24.1.130
-
-Then launch client application.
-
-    $ ./example/weigh
-
-How to put weigh of a specimen into Medusa is shown below.
-
-1. Put a specimen on a balance.
-2. Scan specimen-ID by barcode reader.
-3. A web page that corresponds to the specimen-ID will shown up.
-   Confirm if quantity was updated.
+1. Open web page (as of April 28, 2017, 172.24.1.130).
+2. Click Start
+3. Scan connection code to hear beep twice.
+4. Put a specimen.
+5. Scan specimen-ID.  Confirm if quantity was updated.
