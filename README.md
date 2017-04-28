@@ -41,16 +41,17 @@ Listen to two devices.
     Codename:       jessie
     $ git clone https://github.com/misasa/dream_io
     $ cd dream_io
+    $ sudo cp -r ./nodejs /srv/
+    $ sudo cp /srv/nodejs/config/default.yaml.example /srv/nodejs/config/default.yaml
     $ sudo cp ./udev/rules.d/rfcomm.rules /etc/udev/rurles.d/
-    $ sudo cp ./systemd/system/listen_rfcomm0.service /etc/systemd/system/
-    $ sudo cp ./systemd/system/gateway_rfcomm0.service /etc/systemd/system/
-    $ sudo cp ./systemd/system/geteway_ttyUSB0.service /etc/systemd/system/
-    $ sudo systemctl enable listen_rfcomm0.service
-    $ sudo systemctl enable gateway_rfcomm0.service
-    $ sudo systemctl enable tageway_ttyUSB0.service
+    $ sudo cp ./systemd/system/weigh.service /etc/systemd/system/
+    $ sudo cp ./systemd/system/weigh_console.service /etc/systemd/system/
+    $ sudo systemctl daemon-reload
+    $ sudo systemctl enable weigh.service
+    $ sudo systemctl enable weigh_console.service
     $ sudo systemctl start listen_rfcomm0.service
-    $ sudo systemctl start gateway_rfcomm0.service
-    $ sudo systemctl start gateway_ttyUSB0.service
+    $ sudo systemctl start weigh.service
+    $ sudo systemctl start weigh.service
 
 # Operation manual
 
