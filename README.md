@@ -49,9 +49,8 @@ Listen to two devices.
     $ sudo systemctl daemon-reload
     $ sudo systemctl enable weigh.service
     $ sudo systemctl enable weigh_console.service
-    $ sudo systemctl start listen_rfcomm0.service
     $ sudo systemctl start weigh.service
-    $ sudo systemctl start weigh.service
+    $ sudo systemctl start weigh_console.service
 
 # Operation manual
 
