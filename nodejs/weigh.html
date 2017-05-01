@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>METTLER TOLEDO</title>
+    <style>
+     * { margin: 0; padding: 0; box-sizing: border-box; }
+     body { font: 13px Helvetica, Arial; }
+     #messages { list-style-type: none; margin: 0; padding: 0; }
+     #messages li { padding: 5px 10px; }
+     #messages li:nth-child(odd) { background: #eee; }
+   </style>
+  </head>
+  <body>
+    <h1>METTLER TOLEDO</h1>
+    <div id="status"></div>
+    <form action="">
+      <button>Start</button>
+    </form>
+    <ul id="messages"></ul>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
+    <script>
+       // Publisher
+       pubnub = new PubNub({
+         publishKey : 'demo',
+	 subscribeKey : 'demo'
+       })
+       pubnub.addListener({
+         message: function(message) {
+	   obj = message.message;
+	   console.log("New Message!!", obj);
+	   line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
+	   $('#messages').append($('<li>').text(line))
+	 }
+       })
+       console.log('Subscribing...');
+       pubnub.subscribe({
+         channels: ['weigh']
+       });
+       $('form').submit(function(){
+         $.post('/reset');
+	 $('#status').text('restarting dream-io. please reload this page after while.');
+       });
+    </script>
+  </body>
+</html>

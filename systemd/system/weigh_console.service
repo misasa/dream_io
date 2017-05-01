@@ -1,0 +1,12 @@
+[Unit]
+Description = Weigh Console Service
+After=syslog.target network.target
+[Service]
+WorkingDirectory=/srv/nodejs
+ExecStart = /usr/bin/node weigh_console.js
+Restart = always
+RestartSec = 10
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
