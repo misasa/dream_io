@@ -1,6 +1,7 @@
 [Unit]
 Description = Weigh Service
-After=bluetooth.service
+BindTo = dev-ttyUSB0.device
+After=bluetooth.service dev-ttyUSB0.device
 Requires=bluetooth.service
 [Service]
 WorkingDirectory=/srv/nodejs
