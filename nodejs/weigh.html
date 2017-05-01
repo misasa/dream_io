@@ -58,13 +58,9 @@
            console.log(message);
            if (message.channel == 'weigh_console') {
              msg = message.message;
-             status = msg.status;
              console.log(msg);
-             console.log(status);
-             if (status){
+             if (msg == "started"){
                 state = "<h5 class='center'><i class='fa fa-play-circle-o'></i>Running</h5>";
-                $('.js-aircon-on').addClass('disabled');
-                $('.js-aircon-off').removeClass('disabled');
                 $('.js-state-output').html(state)
              }
            } else {
@@ -89,6 +85,7 @@
             console.log('success');
             state = "<div class='progress'><div class='indeterminate'></div></div>";
             $('.js-state-output').html(state);
+            $('.js-aircon-on').addClass('disabled');
           }
         })
 
