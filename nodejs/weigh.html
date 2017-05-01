@@ -2,20 +2,47 @@
 <html>
   <head>
     <title>METTLER TOLEDO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/css/materialize.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <style>
-     * { margin: 0; padding: 0; box-sizing: border-box; }
-     body { font: 13px Helvetica, Arial; }
-     #messages { list-style-type: none; margin: 0; padding: 0; }
-     #messages li { padding: 5px 10px; }
-     #messages li:nth-child(odd) { background: #eee; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      .u-mb20 {
+        margin-bottom: 20px;
+      }
+      .gbl-nav {
+        background-color: #444444;
+      }
+      .sub-title {
+        font-size: 20px;
+        border-bottom: 1px solid #ccc;
+      }
    </style>
   </head>
   <body>
-    <h1>METTLER TOLEDO</h1>
-    <div id="status"></div>
-    <form action="">
-      <button>Start</button>
-    </form>
+    <nav class="gbl-nav u-mb20">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">METTLER TOLEDO</a>
+      </div>
+    </nav>    
+    <div class="container">
+      <div class="u-mb20">
+        <span class="js-state-output2">
+        </span>
+      </div>
+      <div class="row u-mb20">
+        <div class="col s4">
+          <a class="waves-effect waves-light btn-large js-aircon-on">Start</a>
+        </div>
+        <div class="col s4">
+          <span class="js-state-output"></span>
+        </div>
+      </div>      
+    </div>
     <ul id="messages"></ul>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -24,23 +51,55 @@
        // Publisher
        pubnub = new PubNub({
          publishKey : 'demo',
-	 subscribeKey : 'demo'
+	       subscribeKey : 'demo'
        })
        pubnub.addListener({
          message: function(message) {
-	   obj = message.message;
-	   console.log("New Message!!", obj);
-	   line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
-	   $('#messages').append($('<li>').text(line))
-	 }
-       })
+           console.log(message);
+           if (message.channel == 'weigh_console') {
+             msg = message.message;
+             status = msg.status;
+             console.log(msg);
+             console.log(status);
+             if (status){
+                state = "<h5 class='center'><i class='fa fa-play-circle-o'></i>Running</h5>";
+                $('.js-aircon-on').addClass('disabled');
+                $('.js-aircon-off').removeClass('disabled');
+                $('.js-state-output').html(state)
+             }
+           } else {
+	           obj = message.message;
+	           console.log("New Message!!", obj);
+	           line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
+	           $('#messages').append($('<li>').text(line));
+           }
+	       }
+       });
        console.log('Subscribing...');
        pubnub.subscribe({
-         channels: ['weigh']
+         channels: ['weigh','weigh_console']
        });
+        // Publisher
+      $('.js-aircon-on').click(function() {
+        console.log('on');
+        pubnub.publish({channel : 'weigh_console', message : 'restart'}, function(status, response){
+          console.log(status, response);
+          console.log(status.statusCode);
+          if (status.statusCode == 200){
+            console.log('success');
+            state = "<div class='progress'><div class='indeterminate'></div></div>";
+            $('.js-state-output').html(state);
+          }
+        })
+
+      });
+      $('.js-aircon-off').click(function() {
+        console.log('off');
+      });
+
        $('form').submit(function(){
          $.post('/reset');
-	 $('#status').text('restarting dream-io. please reload this page after while.');
+	       $('#status').text('restarting dream-io. please reload this page after while.');
        });
     </script>
   </body>
