@@ -14,26 +14,40 @@ following path.
 - MS 16002S (balance) <RS232C/USB> DREAM I/O
 - DREAM I/O (weigh.js) <TCP/IP> Medusa
 
-The process can be monitored by web server that runs on DREAM I/O.
-This interface lets user reset the DREAM I/O.
+The process can be monitored by web server that runs on http://devel.misasa.okayama-u.ac.jp/io/.
+This interface also lets user restart the DREAM I/O.
 
-- DREAM I/O (weigh_consle.js)
+- devel.misasa.okayama-u.ac.jp (/io/index.html)
+- DREAM I/O (weigh_console.js)
+
+# Operation manual
+
+1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
+2. Click Start.
+3. Scan connection code to hear beep twice.
+4. Put a specimen.
+5. Scan specimen-ID.  Confirm if quantity was updated.
 
 # Configuration
 
 ## CR 2600 (barcode reader)
 
+See somewhere else.
+
 ## MS 16002S (balance)
 
-## DREAM I/O
+Enable communication using RS-232C.  Turn on `HOST` mode.
 
-Listen to two devices.
+## DREAM I/O (Raspberry Pi)
+
+DREAM I/O listens two devices as shown below.
 
 - listen `rfcomm0': Receive specimen-ID from barcode reader via
   Bluetooth.
 - listen `ttyUSB0': Receive weight from balance via RS232C.
 
-### Instalation
+Install and activate services as shown below.
+
     $ lsb_release -a
     Distributor ID: Raspbian
     Description:    Raspbian GNU/Linux 8.0 (jessie)
@@ -51,11 +65,3 @@ Listen to two devices.
     $ sudo systemctl enable weigh_console.service
     $ sudo systemctl start weigh.service
     $ sudo systemctl start weigh_console.service
-
-# Operation manual
-
-1. Open web page (as of April 28, 2017, 172.24.1.130).
-2. Click Start
-3. Scan connection code to hear beep twice.
-4. Put a specimen.
-5. Scan specimen-ID.  Confirm if quantity was updated.
