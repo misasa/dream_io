@@ -79,7 +79,7 @@
              if (msg == "started"){
                 state = "<h5 class='center'><i class='fa fa-play-circle-o'></i>Running</h5>";
                 $('.js-state-output').html(state)
-                $('.js-aircon-on').addClass('enabled');
+                $('.js-aircon-on').removeClass('disabled');
              }
            } else {
 	           obj = message.message;
