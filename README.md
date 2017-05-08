@@ -5,42 +5,43 @@ dream_io
 Specimen-ID is delivered from barcode reader to Medusa via following
 path.
 
-- CR 2600 (barcode reader) <Bluetooth> DREAM I/O (weigh.js)
-- DREAM I/O (weigh.js) <TCP/IP> Medusa
+- CR 3500 (barcode reader) <Bluetooth> DREAM IO (weigh.js)
+- DREAM IO (weigh.js) <TCP/IP> Medusa
 
 Quantity of the specimen is delivered from balance to Medusa via
 following path.
 
-- MS 16002S (balance) <RS232C/USB> DREAM I/O
-- DREAM I/O (weigh.js) <TCP/IP> Medusa
+- MS 16002S (balance) <RS232C/USB> DREAM IO
+- DREAM IO (weigh.js) <TCP/IP> Medusa
 
-The process can be monitored by web server that runs on http://devel.misasa.okayama-u.ac.jp/io/.
-This interface also lets user restart the DREAM I/O.
+The process can be monitored by web server referred as DREAM manager
+that runs on http://devel.misasa.okayama-u.ac.jp/io/.  This interface
+also lets user restart the DREAM IO.
 
-- devel.misasa.okayama-u.ac.jp (/io/index.html)
-- DREAM I/O (weigh_console.js)
+- devel.misasa.okayama-u.ac.jp (DREAM manager, /io/index.html)
+- DREAM IO (weigh_console.js)
 
 # Operation manual
 
 1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
-2. Click Start.
+2. Click Start to reboot DREAM IO.
 3. Scan connection code to hear beep twice.
 4. Put a specimen.
 5. Scan specimen-ID.  Confirm if quantity was updated.
 
 # Configuration
 
-## CR 2600 (barcode reader)
+## CR 3500 (barcode reader)
 
-See somewhere else.
+See somewhere else.  As of May 8, 2017, CR 2600 is not supported.
 
 ## MS 16002S (balance)
 
 Enable communication using RS-232C.  Turn on `HOST` mode.
 
-## DREAM I/O (Raspberry Pi)
+## DREAM IO (Raspberry Pi)
 
-DREAM I/O listens two devices as shown below.
+DREAM IO listens two devices as shown below.
 
 - listen `rfcomm0': Receive specimen-ID from barcode reader via
   Bluetooth.
