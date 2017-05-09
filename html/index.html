@@ -28,8 +28,6 @@
       <div class="nav-wrapper">
         <a href="#" class="brand-logo center">METTLER TOLEDO</a>
       </div>
-
-
     </nav>
     <div class="container">
       <div class="u-mb20">
@@ -37,30 +35,31 @@
         </span>
       </div>
       <div class="row u-mb20">
-        <div class="col s4">
+        <div class="col s2">
           <a class="waves-effect waves-light btn-large js-aircon-on">Start</a>
         </div>
-        <div class="col s4">
+        <div class="col s10">
           <span class="js-state-output"></span>
-        </div>
+        </div>        
       </div>
       <div class="row u-mb20">
-        <div class="col s4">
+        <div class="col s2">
           <img src="images/B827EB682A32.png" width="100">
         </div>
+        <div class="col s10">
+          <hr>
+          <ul>
+            <li> Click Start. </li>
+            <li> Scan connection code to hear beep twice. </li>
+            <li> Put a specimen. </li>
+            <li> Scan specimen-ID. Confirm if quantity was updated. </li>
+          </ul>
+          <hr>
+        </div>
       </div>
+      <ul id="messages" class="collection">
+      </ul>
     </div>
-
-    <hr>
-    <ul>
-      <li> Click Start. </li>
-      <li> Scan connection code to hear beep twice. </li>
-      <li> Put a specimen. </li>
-      <li> Scan specimen-ID. Confirm if quantity was updated. </li>
-    </ul>
-    <hr>
-
-    <ul id="messages"></ul>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
@@ -85,7 +84,7 @@
 	           obj = message.message;
 	           console.log("New Message!!", obj);
 	           line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
-	           $('#messages').append($('<li>').text(line));
+	           $('#messages').prepend($('<li class="collection-item">').text(line));
            }
 	       }
        });
