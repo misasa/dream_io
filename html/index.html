@@ -56,6 +56,17 @@
           </ul>
         </div>
       </div>
+      <div class="row">
+        <div class="col s12">
+          <div class="card blue-grey">
+            <div class="card-content green-text">
+              <span class="card-title obj-name">...</span>
+              <span class="obj-id"></span>
+              <h2 class="weight">----</h2>
+            </div>
+          </div>
+        </div>
+      </div>
       <ul id="messages" class="collection">
       </ul>
     </div>
@@ -82,6 +93,9 @@
            } else {
 	           obj = message.message;
 	           console.log("New Message!!", obj);
+             $('.obj-id').html('&lt' + obj.id + '&gt')        
+             $('.obj-name').html(obj.name)
+             $('.weight').html(obj.weight + " " + obj.weight_unit)
 	           line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
 	           $('#messages').prepend($('<li class="collection-item">').text(line));
            }
@@ -106,8 +120,16 @@
         })
 
       });
+
       $('.js-aircon-off').click(function() {
         console.log('off');
+      });
+
+      $('.js-load').click(function() {
+        console.log('loading...');
+        $('.obj-id').html('&lt' + '201705101225-0000' + '&gt')        
+        $('.obj-name').html('deleteme.stone')
+        $('.weight').html('123.45 g')
       });
 
        $('form').submit(function(){
