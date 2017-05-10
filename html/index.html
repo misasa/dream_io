@@ -60,9 +60,12 @@
         <div class="col s12">
           <div class="card blue-grey">
             <div class="card-content green-text">
-              <span class="card-title obj-name">...</span>
-              <span class="obj-id"></span>
+              <span class="card-title obj-name">----</span>
+              &lt<span class="obj-id">----</span>&gt
               <h2 class="weight">----</h2>
+            </div>
+            <div class="card-action">
+              <a class="waves-effect waves-light btn-large js-label-print">Label</a>
             </div>
           </div>
         </div>
@@ -93,7 +96,7 @@
            } else {
 	           obj = message.message;
 	           console.log("New Message!!", obj);
-             $('.obj-id').html('&lt' + obj.id + '&gt')        
+             $('.obj-id').html(obj.id)        
              $('.obj-name').html(obj.name)
              $('.weight').html(obj.weight + " " + obj.weight_unit)
 	           line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
@@ -125,11 +128,20 @@
         console.log('off');
       });
 
+      $('.js-label-print').click(function() {
+        console.log('label printing...');
+        var gid = $('.obj-id').text();
+        var name = $('.obj-name').text();
+        console.log('ID: ' + gid);
+        console.log('NAME: ' + name);
+        $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+      });
+
       $('.js-load').click(function() {
         console.log('loading...');
         $('.obj-id').html('&lt' + '201705101225-0000' + '&gt')        
         $('.obj-name').html('deleteme.stone')
-        $('.weight').html('123.45 g')
+        $('.weight').html('123.45 g') 
       });
 
        $('form').submit(function(){
