@@ -4,7 +4,7 @@ After=bluetooth.service
 Requires=bluetooth.service
 [Service]
 WorkingDirectory=/srv/nodejs
-ExecStart = /usr/bin/node pub_rfcomm.js -c hello_world
+ExecStart = /usr/bin/node pub_rfcomm.js -c rfcomm
 Restart = always
 RestartSec = 10
 Type = simple

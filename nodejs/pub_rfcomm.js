@@ -1,43 +1,29 @@
+var PubNub = require('pubnub');
+var Config = require('config');
 var argv = require('minimist')(process.argv.slice(2));
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 var rfcomm = new(require('bluetooth-serial-port')).BluetoothSerialPortServer();
 var delimiter = new Buffer('\r\n');
-var port = argv['p'];
+var channel = argv['c'];
 var dataBuffer = new Buffer(0);
+var address;
+var pubnub = new PubNub(Config.config.pubnub);
 
-if (port == undefined) {
-  console.error('Usage: nodejs rfcomm.js -p 2002');
+if (channel == undefined) {
+  console.error('Usage: nodejs pub_rfcomm.js -c rfcomm');
   process.exit(1);
 }
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/rfcomm.html');
-});
-
-io.on('connection', function(socket){
-  console.log('a user connected');
-  console.log('rfcomm: ' + rfcomm.isOpen());
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
-    console.log('message: ' + msg);
-  });
-});
-
 rfcomm.on('data',
   function(buffer){
     dataBuffer = Buffer.concat([dataBuffer, buffer]);
     let position;
     while((position = dataBuffer.indexOf(delimiter)) !== -1){
       var data = dataBuffer.slice(0, position);
-      io.emit('chat message', data.toString());
-      console.log('data: [' + data + ']');
       dataBuffer = dataBuffer.slice(position + delimiter.length);
-      rfcomm.close();
-      return;
+      console.log('data: [' + data + ']');
+      pubnub.publish(
+        {channel: channel, message: {'address' : address, 'data' : data.toString()}},
+	function(status, response){}
+      );
     }
   }
 );
@@ -47,15 +33,17 @@ rfcomm.on('failure', function(err){
 });
 rfcomm.listen(
   function(clientAddress){
+    address = clientAddress;
     var dataBuffer = new Buffer(0);
     console.log('Client: ' + clientAddress + ' connected!');
+    pubnub.publish(
+      {channel: channel, message: {'address' : clientAddress}},
+      function(status, response){}
+    );
   },
   function(error){
     console.log('Something wrong happend!:' + error);
   },
   {channel: 1}
 );
-
-http.listen(port, function(){
-  console.log('listening on *:' + port);
-});
+console.log("listening rfcomm...");
