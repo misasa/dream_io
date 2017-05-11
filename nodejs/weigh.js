@@ -8,6 +8,7 @@ var delimiter = new Buffer('\r\n');
 var channel = argv['c'];
 var dataBuffer = new Buffer(0);
 var serial_device = '/dev/ttyUSB0';
+var address;
 if (channel == undefined) {
   console.error('Usage: nodejs rfcomm.js -c rfcomm');
   process.exit(1);
@@ -117,6 +118,10 @@ rfcomm.on('data',
       var data = dataBuffer.slice(0, position);
       dataBuffer = dataBuffer.slice(position + delimiter.length);
       console.log('data: [' + data + ']');
+      pubnub.publish(
+        {channel: 'rfcomm', message: {address: address, data: data.toString()}},
+	function(status, response){}
+      );
       var id = to_id(data.toString());
       get_object(id, 
         function (object){
@@ -147,8 +152,13 @@ rfcomm.on('failure', function(err){
 });
 rfcomm.listen(
   function(clientAddress){
+    address = clientAddress;
     var dataBuffer = new Buffer(0);
     console.log('Client: ' + clientAddress + ' connected!');
+    pubnub.publish(
+      {channel: 'rfcomm', message: {'address' : clientAddress}},
+      function(status,response){}
+    );
   },
   function(error){
     console.log('Something wrong happend!:' + error);
