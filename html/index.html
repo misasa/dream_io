@@ -31,8 +31,14 @@
     </nav>
     <div class="container">
       <div class="u-mb20">
-        <span class="js-state-output2">
-        </span>
+        <span class="js-state-output2"></span>
+          <ul>
+            <li> Click Start. </li>
+            <li> Scan connection code to hear beep twice. </li>
+            <li> Put a specimen. </li>
+            <li> Scan specimen-ID. Confirm if quantity was updated. </li>
+          </ul>
+        
       </div>
       <div class="row u-mb20">
         <div class="col s4">
@@ -49,10 +55,8 @@
         </div>
         <div class="col s8">
           <ul>
-            <li> Click Start. </li>
-            <li> Scan connection code to hear beep twice. </li>
-            <li> Put a specimen. </li>
-            <li> Scan specimen-ID. Confirm if quantity was updated. </li>
+           <li><h5>Address: <span class="bt-address"></span></h5></li>
+           <li><h5>Data: <span class="bt-data"></span></h5></li>
           </ul>
         </div>
       </div>
@@ -85,28 +89,40 @@
        pubnub.addListener({
          message: function(message) {
            console.log(message);
+           
            if (message.channel == 'weigh_console') {
              msg = message.message;
              console.log(msg);
              if (msg == "started"){
-                state = "<h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5>";
-                $('.js-state-output').html(state)
-                $('.js-aircon-on').removeClass('disabled');
+               state = "<h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5>";
+               $('.js-state-output').html(state)
+               $('.js-aircon-on').removeClass('disabled');
+             }
+           } else if (message.channel == 'rfcomm'){
+             obj = message.message;
+             console.log(obj);
+             if ("address" in obj){
+               $('.bt-address').html(obj.address);
+             }
+             if ("data" in obj){
+                $('.bt-data').html(obj.data);      
+             } else {
+                $('.bt-data').html('');
              }
            } else {
-	           obj = message.message;
-	           console.log("New Message!!", obj);
+	         obj = message.message;
+	         console.log("New Message!!", obj);
              $('.obj-id').html(obj.id)        
              $('.obj-name').html(obj.name)
              $('.weight').html(obj.weight + " " + obj.weight_unit)
-	           line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
-	           $('#messages').prepend($('<li class="collection-item">').text(line));
+	         line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
+	         $('#messages').prepend($('<li class="collection-item">').text(line));
            }
-	       }
+	     }
        });
        console.log('Subscribing...');
        pubnub.subscribe({
-         channels: ['weigh','weigh_console']
+         channels: ['weigh','weigh_console','rfcomm']
        });
         // Publisher
       $('.js-aircon-on').click(function() {
