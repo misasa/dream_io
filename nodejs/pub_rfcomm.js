@@ -1,17 +1,24 @@
+var Medusa = require('./medusa');
 var PubNub = require('pubnub');
 var Config = require('config');
 var argv = require('minimist')(process.argv.slice(2));
 var rfcomm = new(require('bluetooth-serial-port')).BluetoothSerialPortServer();
 var delimiter = new Buffer('\r\n');
-var channel = argv['c'];
 var dataBuffer = new Buffer(0);
 var address;
-var pubnub = new PubNub(Config.config.pubnub);
 
+var channel = argv['c'];
 if (channel == undefined) {
-  console.error('Usage: nodejs pub_rfcomm.js -c rfcomm');
+  console.error('Usage: nodejs pub_rfcomm.js -c rfcomm --medusa');
   process.exit(1);
 }
+
+var flag_medusa = true;
+if (argv['medusa'] == undefined){
+  flag_medusa = false;
+}
+var medusa = new Medusa(Config.config.medusa);
+var pubnub = new PubNub(Config.config.pubnub);
 rfcomm.on('data',
   function(buffer){
     dataBuffer = Buffer.concat([dataBuffer, buffer]);
@@ -24,7 +31,17 @@ rfcomm.on('data',
         {channel: channel, message: {'address' : address, 'data' : data.toString()}},
 	function(status, response){}
       );
+      if (flag_medusa){
+        console.log("getting...");
+	medusa.get_object(data.toString(),
+	  function (object){
+	    pubnub.publish({channel: channel, message: {'address': address, 'data' : data.toString(), 'medusa' : object}},
+	    function(status, response){}
+	    );
+	  });
+      }
     }
+
   }
 );
 rfcomm.on('closed',function(){ console.log('closed!') });

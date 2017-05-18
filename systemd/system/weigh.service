@@ -1,8 +1,7 @@
 [Unit]
 Description = Weigh Service
 BindTo = dev-ttyUSB0.device
-After=bluetooth.service dev-ttyUSB0.device
-Requires=bluetooth.service
+After=dev-ttyUSB0.device
 [Service]
 WorkingDirectory=/srv/nodejs
 ExecStart = /usr/bin/node weigh.js -c weigh
