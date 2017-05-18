@@ -31,8 +31,15 @@
     </nav>
     <div class="container">
       <div class="u-mb20">
-        <span class="js-state-output2">
-        </span>
+        <span class="js-state-output2"></span>
+          <ul>
+            <li> Click Start. </li>
+            <li> Scan connection code to hear beep twice. </li>
+            <li> Put a specimen. </li>
+            <li> Scan specimen-ID.</li>
+            <li> Push Weigh button. Confirm if quantity was updated. </li>
+          </ul>
+        
       </div>
       <div class="row u-mb20">
         <div class="col s4">
@@ -49,23 +56,36 @@
         </div>
         <div class="col s8">
           <ul>
-            <li> Click Start. </li>
-            <li> Scan connection code to hear beep twice. </li>
-            <li> Put a specimen. </li>
-            <li> Scan specimen-ID. Confirm if quantity was updated. </li>
+           <li><h5>Address: <span class="bt-address"></span></h5></li>
+           <li><h5>Data: <span class="bt-data"></span></h5></li>
           </ul>
         </div>
       </div>
       <div class="row">
         <div class="col s12">
-          <div class="card blue-grey">
-            <div class="card-content green-text">
-              <span class="card-title obj-name">----</span>
-              &lt<span class="obj-id">----</span>&gt
-              <h2 class="weight">----</h2>
+          <div class="card-panel grey lighten-5 z-depth-1">
+            <div class="row valign-wrapper">
+              <div class="col s5">
+                <div class="card-image"></div>
+              </div>
+              <div class="col s5">
+                <span class="obj-id"></span>
+                <h5 class="card-title obj-name"></h5>
+              </div>
+
             </div>
             <div class="card-action">
-              <a class="waves-effect waves-light btn-large js-label-print">Label</a>
+              <a class="waves-effect waves-light btn-large js-label-print disabled">Label</a>
+              <a class="waves-effect waves-light btn-large js-weigh disabled">Weigh</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <div class="card-panel blue-grey">
+            <div class="card-content green-text">
+              <span class="weight">----</span>
             </div>
           </div>
         </div>
@@ -73,42 +93,77 @@
       <ul id="messages" class="collection">
       </ul>
     </div>
+    <script id="dataJSON" type="application/json"></script>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
     <script>
        // Publisher
        pubnub = new PubNub({
-         publishKey : 'demo',
-	       subscribeKey : 'demo'
+         publishKey : 'pub-c-a7b58778-6fff-43b8-b87b-cf4771c8ed6c',
+	       subscribeKey : 'sub-c-100d0512-eda5-11e6-889b-02ee2ddab7fe'
        })
        pubnub.addListener({
          message: function(message) {
-           console.log(message);
+           
            if (message.channel == 'weigh_console') {
              msg = message.message;
              console.log(msg);
              if (msg == "started"){
-                state = "<h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5>";
-                $('.js-state-output').html(state)
-                $('.js-aircon-on').removeClass('disabled');
+               state = "<h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5>";
+               $('.js-state-output').html(state)
+               $('.js-aircon-on').removeClass('disabled');
+             }
+           } else if (message.channel == 'rfcomm'){
+             obj = message.message;
+             if ("address" in obj){
+               $('.bt-address').html(obj.address);
+             }
+             if ("data" in obj){
+               $('.bt-data').html(obj.data);
+             } else {
+                $('.bt-data').html('');
+             }
+             if ("medusa" in obj){
+               medusa_obj = obj.medusa;
+               $('#dataJSON').html(JSON.stringify(medusa_obj));
+               $('.obj-id').html("&lt;" + medusa_obj.global_id + "&gt;");        
+               $('.obj-name').html(medusa_obj.datum_attributes.name);
+               $('.card-image').html("<img src='https://database.misasa.okayama-u.ac.jp" + medusa_obj.datum_attributes.primary_file_thumbnail_path + "'>")
+               $('.js-label-print').removeClass('disabled');
+               $('.js-weigh').removeClass('disabled');
+             } else {
+               $('#dataJSON').html("");
+               $('.obj-id').html("");        
+               $('.obj-name').html("");
+               $('.card-image').html("")
+               $('.js-label-print').removeClass('disabled');
+               $('.js-weigh').removeClass('disabled');
+             }
+
+           } else if (message.channel == 'weigh') {
+             msg = message.message;
+             if ("data" in msg){
+               $('.weight').html(msg.data);
+             }
+             if ("log" in msg){
+               $('#messages').prepend($('<li class="collection-item">').text(msg.log));
              }
            } else {
-	           obj = message.message;
-	           console.log("New Message!!", obj);
-             $('.obj-id').html(obj.id)        
-             $('.obj-name').html(obj.name)
-             $('.weight').html(obj.weight + " " + obj.weight_unit)
-	           line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
-	           $('#messages').prepend($('<li class="collection-item">').text(line));
+	         obj = message.message;
+	         console.log("New Message!!", obj);
            }
-	       }
+        
+	    }
+        
        });
        console.log('Subscribing...');
        pubnub.subscribe({
-         channels: ['weigh','weigh_console']
+         channels: ['weigh','weigh_console','rfcomm','medusa']
        });
-        // Publisher
+
+       pubnub.publish({channel : 'weigh', message : {command:'get_and_save'}}, function(s, r){});
+      // Publisher
       $('.js-aircon-on').click(function() {
         console.log('on');
         pubnub.publish({channel : 'weigh_console', message : 'restart'}, function(status, response){
@@ -121,33 +176,29 @@
             $('.js-aircon-on').addClass('disabled');
           }
         })
-
       });
 
-      $('.js-aircon-off').click(function() {
-        console.log('off');
+      $('.js-weigh').click(function() {
+        console.log('weigh...');
+        $('.weight').html('----');
+        var json = $('#dataJSON').html();
+        var obj = $.parseJSON(json);
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', object: obj}}, function(status, response){});
       });
 
       $('.js-label-print').click(function() {
         console.log('label printing...');
-        var gid = $('.obj-id').text();
-        var name = $('.obj-name').text();
-        console.log('ID: ' + gid);
-        console.log('NAME: ' + name);
-        $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+        var json = $('#dataJSON').html();
+        var obj = $.parseJSON(json);
+        console.log(obj);
+        if ("global_id" in obj){
+          var gid = obj.global_id;
+          var name = obj.datum_attributes.name;
+          console.log('ID: ' + gid + ' NAME: ' + name);
+          $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+        }
       });
 
-      $('.js-load').click(function() {
-        console.log('loading...');
-        $('.obj-id').html('&lt' + '201705101225-0000' + '&gt')        
-        $('.obj-name').html('deleteme.stone')
-        $('.weight').html('123.45 g') 
-      });
-
-       $('form').submit(function(){
-         $.post('/reset');
-	       $('#status').text('restarting dream-io. please reload this page after while.');
-       });
     </script>
   </body>
 </html>
