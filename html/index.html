@@ -62,14 +62,25 @@
       </div>
       <div class="row">
         <div class="col s12">
-          <div class="card blue-grey">
-            <div class="card-content green-text">
+          <div class="card">
+            <div class="card-image">
+            </div>
+            <div class="card-content">
               <span class="card-title obj-name">----</span>
               &lt<span class="obj-id">----</span>&gt
-              <h2 class="weight">----</h2>
             </div>
             <div class="card-action">
               <a class="waves-effect waves-light btn-large js-label-print">Label</a>
+              <a class="waves-effect waves-light btn-large js-weigh">Weigh</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <div class="card blue-grey">
+            <div class="card-content green-text">
+              <h2 class="weight">----</h2>
             </div>
           </div>
         </div>
@@ -77,14 +88,15 @@
       <ul id="messages" class="collection">
       </ul>
     </div>
+    <script id="dataJSON" type="application/json"></script>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.8.0.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
     <script>
        // Publisher
        pubnub = new PubNub({
-         publishKey : 'demo',
-	       subscribeKey : 'demo'
+         publishKey : 'pub-c-a7b58778-6fff-43b8-b87b-cf4771c8ed6c',
+	       subscribeKey : 'sub-c-100d0512-eda5-11e6-889b-02ee2ddab7fe'
        })
        pubnub.addListener({
          message: function(message) {
@@ -105,24 +117,46 @@
                $('.bt-address').html(obj.address);
              }
              if ("data" in obj){
-                $('.bt-data').html(obj.data);      
+               $('.bt-data').html(obj.data);
              } else {
                 $('.bt-data').html('');
+             }
+             if ("medusa" in obj){
+               medusa_obj = obj.medusa;
+               console.log(medusa_obj);
+               $('#dataJSON').html(JSON.stringify(medusa_obj));
+               $('.obj-id').html(medusa_obj.global_id);        
+               $('.obj-name').html(medusa_obj.datum_attributes.name);
+               $('.card-image').html("<img src='https://database.misasa.okayama-u.ac.jp" + medusa_obj.datum_attributes.primary_file_thumbnail_path + "'>")
+             } else {
+               $('#dataJSON').html("");
+               $('.obj-id').html('----');        
+               $('.obj-name').html('----');
+               $('.card-image').html("")
+             }
+
+           } else if (message.channel == 'weigh') {
+             msg = message.message;
+             if ("data" in msg){
+               $('.weight').html(msg.data);
+             }
+             if ("log" in msg){
+               $('#messages').prepend($('<li class="collection-item">').text(msg.log));
              }
            } else {
 	         obj = message.message;
 	         console.log("New Message!!", obj);
-             $('.obj-id').html(obj.id)        
-             $('.obj-name').html(obj.name)
-             $('.weight').html(obj.weight + " " + obj.weight_unit)
-	         line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
-	         $('#messages').prepend($('<li class="collection-item">').text(line));
+//             $('.weight').html(obj.weight + " " + obj.weight_unit)
+//	         line = obj.id + " " + obj.name + " -> " + obj.weight + " " + obj.weight_unit + ' OK';
+//	         $('#messages').prepend($('<li class="collection-item">').text(line));
            }
-	     }
+        
+	    }
+        
        });
        console.log('Subscribing...');
        pubnub.subscribe({
-         channels: ['weigh','weigh_console','rfcomm']
+         channels: ['weigh','weigh_console','rfcomm','medusa']
        });
         // Publisher
       $('.js-aircon-on').click(function() {
@@ -143,6 +177,27 @@
       $('.js-aircon-off').click(function() {
         console.log('off');
       });
+
+      $('.js-weigh').click(function() {
+        console.log('weigh...');
+        $('.weight').html('----');
+        var json = $('#dataJSON').html();
+        var obj = $.parseJSON(json);
+        var gid = $('.obj-id').text();
+        var name = $('.obj-name').text();
+        console.log(obj);
+        console.log('ID: ' + gid);
+        console.log('NAME: ' + name);
+        //$.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', object: obj}}, function(status, response){
+          console.log(status, response);
+          console.log(status.statusCode);
+          if (status.statusCode == 200){
+            console.log('success');
+          }});
+
+
+        });
 
       $('.js-label-print').click(function() {
         console.log('label printing...');
