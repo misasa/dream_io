@@ -27,7 +27,8 @@ also lets user restart the DREAM IO.
 2. Click Start to reboot DREAM IO.
 3. Scan connection code to hear beep twice.
 4. Put a specimen.
-5. Scan specimen-ID.  Confirm if quantity was updated.
+5. Scan specimen-ID.  
+6. Push Weigh button. Confirm if quantity was updated.
 
 # Configuration
 
@@ -59,10 +60,13 @@ Install and activate services as shown below.
     $ sudo cp -r ./nodejs /srv/
     $ sudo cp /srv/nodejs/config/default.yaml.example /srv/nodejs/config/default.yaml
     $ sudo cp ./udev/rules.d/rfcomm.rules /etc/udev/rurles.d/
+    $ sudo cp ./systemd/system/nodejs_rfcomm.service /etc/systemd/system/
     $ sudo cp ./systemd/system/weigh.service /etc/systemd/system/
     $ sudo cp ./systemd/system/weigh_console.service /etc/systemd/system/
     $ sudo systemctl daemon-reload
+    $ sudo systemctl enable nodejs_rfcomm.service
     $ sudo systemctl enable weigh.service
     $ sudo systemctl enable weigh_console.service
+    $ sudo systemctl start nodejs_rfcomm.service
     $ sudo systemctl start weigh.service
     $ sudo systemctl start weigh_console.service
