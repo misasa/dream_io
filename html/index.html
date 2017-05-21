@@ -105,7 +105,6 @@
        })
        pubnub.addListener({
          message: function(message) {
-           
            if (message.channel == 'weigh_console') {
              msg = message.message;
              console.log(msg);
@@ -113,6 +112,7 @@
                state = "<h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5>";
                $('.js-state-output').html(state)
                $('.js-aircon-on').removeClass('disabled');
+               refresh_view();
              }
            } else if (message.channel == 'rfcomm'){
              obj = message.message;
@@ -133,12 +133,13 @@
                $('.js-label-print').removeClass('disabled');
                $('.js-weigh').removeClass('disabled');
              } else {
-               $('#dataJSON').html("");
-               $('.obj-id').html("");        
-               $('.obj-name').html("");
-               $('.card-image').html("")
-               $('.js-label-print').removeClass('disabled');
-               $('.js-weigh').removeClass('disabled');
+               refresh_view();
+               //$('#dataJSON').html("");
+               //$('.obj-id').html("");        
+               //$('.obj-name').html("");
+               //$('.card-image').html("")
+               //$('.js-label-print').removeClass('disabled');
+               //$('.js-weigh').removeClass('disabled');
              }
 
            } else if (message.channel == 'weigh') {
@@ -152,11 +153,18 @@
            } else {
 	         obj = message.message;
 	         console.log("New Message!!", obj);
-           }
-        
+           } 
 	    }
-        
        });
+        refresh_view = function (){
+          console.log('refreshing...');
+          $('#dataJSON').html("");
+          $('.obj-id').html("");        
+          $('.obj-name').html("");
+          $('.card-image').html("")
+          $('.js-label-print').addClass('disabled');
+          $('.js-weigh').addClass('disabled');
+        }
        console.log('Subscribing...');
        pubnub.subscribe({
          channels: ['weigh','weigh_console','rfcomm','medusa']
