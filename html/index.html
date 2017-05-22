@@ -86,7 +86,7 @@
                 </div>
               </div>
               <div class="col s2">
-                <a class="waves-effect waves-light btn-large js-weigh disabled"><i class="material-icons">autorenew<i></a>
+                <a class="waves-effect waves-light btn-large js-weigh disabled"><i class="material-icons">autorenew</i></a>
               </div>
             </div>
           </div>
@@ -145,9 +145,10 @@
            } else if (message.channel == 'weigh') {
              msg = message.message;
              if ("data" in msg){
-               $('.weight').html(msg.data);
+               $('.weight').html('<h5>' + msg.data + '</h5>');
              }
              if ("log" in msg){
+               console.log(msg.log);
                $('#messages').prepend($('<li class="collection-item">').text(msg.log));
              }
            } else {
