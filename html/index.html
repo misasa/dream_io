@@ -29,78 +29,70 @@
       <div class="nav-wrapper">
         <a href="#" class="brand-logo">IMOKO-1</a>
         <ul class="right">
-          <li><a class="js-aircon-on"><i class="material-icons">power_settings_new</i></a></li>
-          <li><a class="js-label-print disabled"><i class="material-icons">print</i></a></li>
+          <li></li>
+          <li></li>
         </ul>
       </div>
     </nav>
     <div>
     <div class="container">
+      <ul class="collapsible" data-collapsible="accordion">
+        <li>
+          <div class="collapsible-header"><i class="material-icons">help</i></div>
+          <div class="collapsible-body">
+            <p>
+            <ul>
+              <li> Click Start. </li>
+              <li> Scan connection code to hear beep twice. </li>
+              <li> Put a specimen. </li>
+              <li> Scan specimen-ID.</li>
+              <li> Push Weigh button. Confirm if quantity was updated. </li>
+            </ul>
+            </p>
+          </div>
+        </li>
+      </ul>
       <div class="row u-mb20">
-        <div class="col s12">
+        <div class="col s1 left">
+          <a class="waves-effect waves-light btn-floating red js-aircon-on"><i class="material-icons">power_settings_new</i></a>
+        </div>
+        <div class="col s10 left">
           <span class="js-state-output"><h6 class='center'><i class='fa fa-play-circle-o'></i> Running</h6></span>
         </div>
       </div>
-    
       <div class="row u-mb20">
-        <div class="col s2 right">
-          <a class="btn-large js-label-print disabled"><i class="material-icons">bluetooth</i></a>
-        </div>
         <div class="col s2 left">
-          <img src="images/B827EB682A32.png" width="50">
+          <a class="btn-floating js-rfcomm blue disabled"><i class="material-icons">bluetooth</i></a>
         </div>
         <div class="col s8">
           <ul>
-            <li><span class="bt-address">00:00:00:00:00:00</span></li>
-            <li><span class="bt-data">20151111111-1111</span></li>
+            <li><span class="bt-address"></span></li>
+            <li><span class="bt-data"></span></li>
           </ul>
+        </div>
+        <div class="col s2 right">
+          <img class="right" src="images/B827EB682A32.png" height="80">
         </div>
       </div>
       <div class="row u-mb20">
-        <div class="col s12">
-          <div class="card-panel">
-            <div class="card-action">
-            </div>
-            <div class="row valign-wrapper">
-              <div class="col s5">
-                <span class="obj-id">2010100000</span>
-                <h5 class="card-title obj-name">hello world</h5>
-              </div>
-              <div class="col s5">
-                <div class="card-image"></div>
-              </div>
-            </div>
-          </div>
+        <div class="col s2 left">
+          <a class="waves-effect waves-light btn-floating js-label-print disabled"><i class="material-icons">print</i></a>
         </div>
-      </div>
-      <div class="row u-mb20">        
-        <div class="col s12">
-          <div class="card-panel blue-grey">
-            <div class="row valign-wrapper">
-              <div class="col s10">
-                <div class="card-content green-text">
-                  <span class="weight">----</span>
-                </div>
-              </div>
-              <div class="col s2">
-                <a class="waves-effect waves-light btn-large js-weigh disabled"><i class="material-icons">autorenew</i></a>
-              </div>
-            </div>
-          </div>
+        <div class="col s6">
+          <div class="obj-id"></div>
+          <div class="card-title obj-name"></div>
+        </div>
+        <div class="col s4">
+          <div class="card-image"></div>
         </div>
       </div>
       <div class="row u-mb20">
-        <div class="col s10">
-          <ul>
-            <li> Click Start. </li>
-            <li> Scan connection code to hear beep twice. </li>
-            <li> Put a specimen. </li>
-            <li> Scan specimen-ID.</li>
-            <li> Push Weigh button. Confirm if quantity was updated. </li>
-          </ul>
+        <div class="col s2 left">
+          <a class="waves-effect waves-light btn-floating js-weigh disabled"><i class="material-icons">network_check</i></a>
         </div>
-        <div class="col s2">
-          <img src="images/B827EB682A32.png" width="70">
+        <div class="col s10 left">
+          <div class="balance">METTLER TOLEDO MS1602S</div>
+          <div class="weight"></div>
         </div>
       </div>
       <div class="row u-mb20">
@@ -126,7 +118,7 @@
              msg = message.message;
              console.log(msg);
              if (msg == "started"){
-               state = "<h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5>";
+               state = "<h6 class='center'><i class='fa fa-play-circle-o'></i> Running</h6>";
                $('.js-state-output').html(state)
                $('.js-aircon-on').removeClass('disabled');
                refresh_view();
@@ -134,7 +126,8 @@
            } else if (message.channel == 'rfcomm'){
              obj = message.message;
              if ("address" in obj){
-               $('.bt-address').html('<i class="tiny material-icons">bluetooth</i> ' + obj.address + ':');
+               $('.bt-address').html(obj.address);
+               $('.js-rfcomm').removeClass('disabled');
              }
              if ("data" in obj){
                $('.bt-data').html('[' + obj.data + ']');
@@ -146,7 +139,7 @@
                $('#dataJSON').html(JSON.stringify(medusa_obj));
                $('.obj-id').html("&lt;" + medusa_obj.global_id + "&gt;");        
                $('.obj-name').html(medusa_obj.datum_attributes.name);
-               $('.card-image').html("<img src='https://database.misasa.okayama-u.ac.jp" + medusa_obj.datum_attributes.primary_file_thumbnail_path + "'>")
+               $('.card-image').html("<img height=35 class='right' src='https://database.misasa.okayama-u.ac.jp" + medusa_obj.datum_attributes.primary_file_thumbnail_path + "'>")
                $('.js-label-print').removeClass('disabled');
                $('.js-weigh').removeClass('disabled');
              } else {
@@ -156,7 +149,8 @@
            } else if (message.channel == 'weigh') {
              msg = message.message;
              if ("data" in msg){
-               $('.weight').html('<h5>' + msg.data + '</h5>');
+               //$('.weight').html('<h5>' + msg.data + '</h5>');
+               $('.weight').html(msg.data);
              }
              if ("log" in msg){
                console.log(msg.log);
