@@ -1,35 +1,35 @@
-dream_io
+DREAM-PI
 ====
 # Principle
 
 Specimen-ID is delivered from barcode reader to Medusa via following
 path.
 
-- CR 3500 (barcode reader) <Bluetooth> DREAM IO (pub_rfcomm.js)
-- DREAM IO (pub_rfcomm.js) <TCP/IP> Medusa
+- CR 3500 (barcode reader) <Bluetooth> DREAM PI (pub_rfcomm.js)
+- DREAM PI (pub_rfcomm.js) <TCP/IP> Medusa
 
 Quantity of the specimen is delivered from balance to Medusa via
 following path.
 
-- MS 16002S (balance) <RS232C/USB> DREAM IO
-- DREAM IO (weigh.js) <TCP/IP> Medusa
+- MS 16002S (balance) <RS232C/USB> DREAM PI
+- DREAM PI (weigh.js) <TCP/IP> Medusa
 
-To ensure reliable connection between DREAM IO and Bluetooth, we
-encourage user to restart DREAM IO before operation.  To restart DREAM
-IO, following application runs on DREAM IO.
+To ensure reliable connection between DREAM PI and Bluetooth, we
+encourage user to restart DREAM PI before operation.  To restart DREAM
+IO, following application runs on DREAM PI.
 
-- DREAM IO (weigh_console.js)
+- DREAM PI (weigh_console.js)
 
 The process can be monitored by web server referred as Imoko that runs
 on http://devel.misasa.okayama-u.ac.jp/io/.  This interface also lets
-user restart the DREAM IO.
+user restart the DREAM PI.
 
 - devel.misasa.okayama-u.ac.jp (DREAM manager, /io/index.html)
 
 # Operation manual
 
 1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
-2. Click Start to reboot DREAM IO.
+2. Click Start to reboot DREAM PI.
 3. Scan connection code to hear beep twice.
 4. Scan specimen-ID.
 5. Put a specimen.
@@ -37,17 +37,19 @@ user restart the DREAM IO.
 
 # Configuration
 
-## CR 3500 (barcode reader)
+## Barcode reader
 
-See somewhere else.  As of May 8, 2017, CR 2600 is not supported.
+As of May 24, 2017, Code CR 2500, CR 3500 and CR 2600 are supported.
+Note that before for the first connection, pincode authorization is
+required for each device.
 
-## MS 16002S (balance)
+## METTLER TOLEDO MS1602S (balance)
 
 Enable communication using RS-232C.  Turn on `HOST` mode.
 
-## DREAM IO (Raspberry Pi)
+## DREAM PI (Raspberry Pi)
 
-DREAM IO listens two devices as shown below.
+DREAM PI listens two devices as shown below.
 
 - listen `rfcomm0': Receive specimen-ID from barcode reader via
   Bluetooth.
