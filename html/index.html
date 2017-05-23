@@ -27,36 +27,33 @@
   <body>
     <nav class="gbl-nav u-mb20">
       <div class="nav-wrapper">
-        <a href="#" class="brand-logo center">IMOKO-1</a>
+        <a href="#" class="brand-logo">IMOKO-1</a>
+        <ul class="right">
+          <li><a class="js-aircon-on"><i class="material-icons">power_settings_new</i></a></li>
+          <li><a class="js-label-print disabled"><i class="material-icons">print</i></a></li>
+        </ul>
       </div>
     </nav>
+    <div>
     <div class="container">
       <div class="row u-mb20">
-        <div class="col s10">
+        <div class="col s12">
+          <span class="js-state-output"><h6 class='center'><i class='fa fa-play-circle-o'></i> Running</h6></span>
+        </div>
+      </div>
+    
+      <div class="row u-mb20">
+        <div class="col s2 right">
+          <a class="btn-large js-label-print disabled"><i class="material-icons">bluetooth</i></a>
+        </div>
+        <div class="col s2 left">
+          <img src="images/B827EB682A32.png" width="50">
+        </div>
+        <div class="col s8">
           <ul>
-            <li> Click Start. </li>
-            <li> Scan connection code to hear beep twice. </li>
-            <li> Put a specimen. </li>
-            <li> Scan specimen-ID.</li>
-            <li> Push Weigh button. Confirm if quantity was updated. </li>
+            <li><span class="bt-address">00:00:00:00:00:00</span></li>
+            <li><span class="bt-data">20151111111-1111</span></li>
           </ul>
-        </div>
-        <div class="col s2">
-          <img src="images/B827EB682A32.png" width="70">
-        </div>
-      </div>
-      <div class="row u-mb20">
-        <div class="col s4">
-          <a class="waves-effect waves-light btn-large js-aircon-on"><i class="material-icons">power_settings_new</i></a>
-          <a class="waves-effect waves-light btn-large js-label-print disabled"><i class="material-icons">print</i></a>
-        </div>
-        <div class="col s8">
-          <span class="js-state-output"><h5 class='center'><i class='fa fa-play-circle-o'></i> Running</h5></span>
-        </div>
-      </div>
-      <div class="row u-mb20">
-        <div class="col s8">
-          <span class="bt-address"></span> <span class="bt-data"></span>
         </div>
       </div>
       <div class="row u-mb20">
@@ -66,8 +63,8 @@
             </div>
             <div class="row valign-wrapper">
               <div class="col s5">
-                <span class="obj-id"></span>
-                <h5 class="card-title obj-name"></h5>
+                <span class="obj-id">2010100000</span>
+                <h5 class="card-title obj-name">hello world</h5>
               </div>
               <div class="col s5">
                 <div class="card-image"></div>
@@ -90,6 +87,20 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row u-mb20">
+        <div class="col s10">
+          <ul>
+            <li> Click Start. </li>
+            <li> Scan connection code to hear beep twice. </li>
+            <li> Put a specimen. </li>
+            <li> Scan specimen-ID.</li>
+            <li> Push Weigh button. Confirm if quantity was updated. </li>
+          </ul>
+        </div>
+        <div class="col s2">
+          <img src="images/B827EB682A32.png" width="70">
         </div>
       </div>
       <div class="row u-mb20">
