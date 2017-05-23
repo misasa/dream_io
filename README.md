@@ -5,8 +5,8 @@ dream_io
 Specimen-ID is delivered from barcode reader to Medusa via following
 path.
 
-- CR 3500 (barcode reader) <Bluetooth> DREAM IO (weigh.js)
-- DREAM IO (weigh.js) <TCP/IP> Medusa
+- CR 3500 (barcode reader) <Bluetooth> DREAM IO (pub_rfcomm.js)
+- DREAM IO (pub_rfcomm.js) <TCP/IP> Medusa
 
 Quantity of the specimen is delivered from balance to Medusa via
 following path.
@@ -14,21 +14,26 @@ following path.
 - MS 16002S (balance) <RS232C/USB> DREAM IO
 - DREAM IO (weigh.js) <TCP/IP> Medusa
 
-The process can be monitored by web server referred as DREAM manager
-that runs on http://devel.misasa.okayama-u.ac.jp/io/.  This interface
-also lets user restart the DREAM IO.
+To ensure reliable connection between DREAM IO and Bluetooth, we
+encourage user to restart DREAM IO before operation.  To restart DREAM
+IO, following application runs on DREAM IO.
+
+- DREAM IO (weigh_console.js)
+
+The process can be monitored by web server referred as Imoko that runs
+on http://devel.misasa.okayama-u.ac.jp/io/.  This interface also lets
+user restart the DREAM IO.
 
 - devel.misasa.okayama-u.ac.jp (DREAM manager, /io/index.html)
-- DREAM IO (weigh_console.js)
 
 # Operation manual
 
 1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
 2. Click Start to reboot DREAM IO.
 3. Scan connection code to hear beep twice.
-4. Put a specimen.
-5. Scan specimen-ID.  
-6. Push Weigh button. Confirm if quantity was updated.
+4. Scan specimen-ID.
+5. Put a specimen.
+6. Push Weigh button.  Confirm if quantity was updated.
 
 # Configuration
 
@@ -70,3 +75,6 @@ Install and activate services as shown below.
     $ sudo systemctl start nodejs_rfcomm.service
     $ sudo systemctl start weigh.service
     $ sudo systemctl start weigh_console.service
+
+Revise configuration file (/srv/nodejs/config/default.yaml) when
+necessary.
