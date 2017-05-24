@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>README.html</title>
+
+</head>
+
+<body>
+
+<h1>DREAM-PI</h1>
+
+<h1>Principle</h1>
+
+<p>Specimen-ID is delivered from barcode reader to Medusa via following
+path.</p>
+
+<ul>
+<li>CR 3500 (barcode reader) <Bluetooth> DREAM PI (pub_rfcomm.js)</li>
+<li>DREAM PI (pub_rfcomm.js) <TCP/IP> Medusa</li>
+</ul>
+
+<p>Quantity of the specimen is delivered from balance to Medusa via
+following path.</p>
+
+<ul>
+<li>MS 16002S (balance) <RS232C/USB> DREAM PI</li>
+<li>DREAM PI (weigh.js) <TCP/IP> Medusa</li>
+</ul>
+
+<p>To ensure reliable connection between DREAM PI and Bluetooth, we
+encourage user to restart DREAM PI before operation.  To restart DREAM
+IO, following application runs on DREAM PI.</p>
+
+<ul>
+<li>DREAM PI (weigh_console.js)</li>
+</ul>
+
+<p>The process can be monitored by web server referred as Imoko that runs
+on http://devel.misasa.okayama-u.ac.jp/io/.  This interface also lets
+user restart the DREAM PI.</p>
+
+<ul>
+<li>devel.misasa.okayama-u.ac.jp (DREAM manager, /io/index.html)</li>
+</ul>
+
+<h1>Operation manual</h1>
+
+<ol>
+<li>Open web page http://devel.misasa.okayama-u.ac.jp/io/.</li>
+<li>Click Start to reboot DREAM PI.</li>
+<li>Scan connection code to hear beep twice.</li>
+<li>Scan specimen-ID.</li>
+<li>Put a specimen.</li>
+<li>Push Weigh button.  Confirm if quantity was updated.</li>
+</ol>
+
+<h1>Configuration</h1>
+
+<h2>Barcode reader</h2>
+
+<p>As of May 24, 2017, Code CR 2500, CR 3500 and CR 2600 are supported.
+Note that before for the first connection, pincode authorization is
+required for each device.</p>
+
+<h2>METTLER TOLEDO MS1602S (balance)</h2>
+
+<p>Enable communication using RS-232C.  Turn on <code>HOST</code> mode.</p>
+
+<h2>DREAM PI (Raspberry Pi)</h2>
+
+<p>DREAM PI listens two devices as shown below.</p>
+
+<ul>
+<li>listen `rfcomm0': Receive specimen-ID from barcode reader via
+Bluetooth.</li>
+<li>listen `ttyUSB0': Receive weight from balance via RS232C.</li>
+</ul>
+
+<p>Install and activate services as shown below.</p>
+
+<pre><code>$ lsb_release -a
+Distributor ID: Raspbian
+Description:    Raspbian GNU/Linux 8.0 (jessie)
+Release:        8.0
+Codename:       jessie
+$ git clone https://github.com/misasa/dream_io
+$ cd dream_io
+$ sudo cp -r ./nodejs /srv/
+$ sudo cp /srv/nodejs/config/default.yaml.example /srv/nodejs/config/default.yaml
+$ sudo cp ./udev/rules.d/rfcomm.rules /etc/udev/rurles.d/
+$ sudo cp ./systemd/system/nodejs_rfcomm.service /etc/systemd/system/
+$ sudo cp ./systemd/system/weigh.service /etc/systemd/system/
+$ sudo cp ./systemd/system/weigh_console.service /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable nodejs_rfcomm.service
+$ sudo systemctl enable weigh.service
+$ sudo systemctl enable weigh_console.service
+$ sudo systemctl start nodejs_rfcomm.service
+$ sudo systemctl start weigh.service
+$ sudo systemctl start weigh_console.service
+</code></pre>
+
+<p>Revise configuration file (/srv/nodejs/config/default.yaml) when
+necessary.</p>
+
+</body>
+</html>
