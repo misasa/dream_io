@@ -68,6 +68,7 @@
         </div>
         <div class="col s8">
           <ul>
+            <li><span class="bt-help">Connect barcode reader by scanning connection code.</span></li>
             <li><span class="bt-address"></span></li>
             <li><span class="bt-data"></span></li>
           </ul>
@@ -129,10 +130,13 @@
              obj = message.message;
              if ("address" in obj){
                $('.bt-address').html(obj.address);
+//               $('.bt-help').html("Ready for another stone.");
+               $('.bt-help').html("Scan ID of a stone.");
                $('.js-rfcomm').removeClass('disabled');
              }
              if ("data" in obj){
                $('.bt-data').html('[' + obj.data + ']');
+               $('.bt-help').html("Ready for another stone.");
              } else {
                 $('.bt-data').html('');
              }
