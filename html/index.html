@@ -28,10 +28,11 @@
     <nav class="gbl-nav u-mb20">
       <div class="nav-wrapper">
         <a href="#" class="brand-logo center">IMOKO-1</a>
+        <span class="switch right"><label>Auto label on/off<input type="checkbox" name="auto_label"><span class="lever"></span></label></span>
       </div>
     </nav>
     <div>
-    <div class="container">
+      <div class="container">
       <ul class="collapsible" data-collapsible="accordion">
         <li>
           <div class="collapsible-header"><i class="material-icons">help</i></div>
@@ -110,6 +111,19 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
     <script>
+       // Label
+       print_label = function (){
+         console.log('label printing...');
+         var json = $('#dataJSON').html();
+         var obj = $.parseJSON(json);
+         console.log(obj);
+         if ("global_id" in obj){
+           var gid = obj.global_id;
+           var name = obj.datum_attributes.name;
+           console.log('ID: ' + gid + ' NAME: ' + name);
+           $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+         }
+       }
        // Publisher
        pubnub = new PubNub({
          publishKey : 'pub-c-a7b58778-6fff-43b8-b87b-cf4771c8ed6c',
@@ -148,6 +162,9 @@
                $('.card-image').html("<img height=35 class='right' src='https://database.misasa.okayama-u.ac.jp" + medusa_obj.datum_attributes.primary_file_thumbnail_path + "'>")
                $('.js-label-print').removeClass('disabled');
                $('.js-weigh').removeClass('disabled');
+               if ($("[name=auto_label]").prop("checked")){
+                 print_label();
+               }
              } else {
                refresh_view();
              }
@@ -177,7 +194,8 @@
           $('.js-label-print').addClass('disabled');
           $('.js-weigh').addClass('disabled');
         }
-       console.log('Subscribing...');
+        
+        console.log('Subscribing...');
        pubnub.subscribe({
          channels: ['weigh','weigh_console','rfcomm','medusa']
        });
@@ -208,15 +226,7 @@
 
       $('.js-label-print').click(function() {
         console.log('label printing...');
-        var json = $('#dataJSON').html();
-        var obj = $.parseJSON(json);
-        console.log(obj);
-        if ("global_id" in obj){
-          var gid = obj.global_id;
-          var name = obj.datum_attributes.name;
-          console.log('ID: ' + gid + ' NAME: ' + name);
-          $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
-        }
+        print_label();
       });
 
     </script>
