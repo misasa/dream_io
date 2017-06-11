@@ -7,4 +7,10 @@ config:
     auth:
       user: "admin"
       password: "admin"
-
+  balance:
+    name: "METTLER TOLEDO MS1602S"
+    port: "/dev/ttyUSB0"
+    options:
+      baudRate: 9600
+    delimiter: "\r\n"
+    command: "S\r\n"

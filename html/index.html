@@ -95,7 +95,7 @@
           <a class="waves-effect waves-light btn-floating js-weigh disabled"><i class="material-icons">network_check</i></a>
         </div>
         <div class="col s10 left">
-          <div class="balance">METTLER TOLEDO MS1602S</div>
+          <div class="balance"></div>
           <div class="weight"></div>
         </div>
       </div>
@@ -174,6 +174,7 @@
              if ("data" in msg){
                //$('.weight').html('<h5>' + msg.data + '</h5>');
                $('.weight').html(msg.data);
+               $('.balance').html(msg.name);
              }
              if ("log" in msg){
                console.log(msg.log);
