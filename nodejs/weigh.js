@@ -1,4 +1,5 @@
 var Medusa = require('./medusa');
+var Balance = require('./balance');
 var PubNub = require('pubnub');
 var Config = require('config');
 var argv = require('minimist')(process.argv.slice(2));
@@ -31,39 +32,41 @@ function publishLog(txt){
     }
   );
 }
-var serial_device = Config.config.balance.port;
-var serial_options = Config.config.balance.options;
-serial_options['parser'] = SerialPort.parsers.readline(Config.config.balance.delimiter)
-var serial_port = new SerialPort(serial_device,serial_options);
-function sendSync(port, src) {
-  return new Promise((resolve, reject) => {
-    port.write(src);
-    port.once('data', (data) => {
-      resolve(data.toString());
-    });
-
-    port.once('error', (err) => {
-      reject(err);
-    });
-  });
+var balance_conf = Config.config.balance;
+balances = {};
+if (balance_conf instanceof Array) {
+  for (i in balance_conf){
+    conf = balance_conf[i];
+    balances[conf.port] = new Balance(conf);
+  }
+} else {
+  balances[balance_conf.port] = new Balance(balance_conf);
 }
+
+//var balance = new Balance(Config.config.balance);
+var port = null;
 pubnub.addListener({
   message: function(m){
     var msg = m.message;
     if (msg.hasOwnProperty('command')){
       if (msg.command == 'get_and_save'){
         console.log('getting...');
-	//var serial_command = 'S\r\n';
-	var serial_command = Config.config.balance.command;
-	console.log(serial_command);
-	sendSync(serial_port, serial_command).then((data) => {
+	console.log(msg);
+	if (msg.hasOwnProperty('port')){
+	  port = msg.port;
+	  console.log("port:" + port);
+	} else {
+	  port = Object.keys(balances)[0];
+	  console.log("port (default):" + port);
+	}
+	var balance = balances[port];
+	balance.gets().then((data) => {
 	  console.log(data);
-	  pubnub.publish({channel: channel, message: {data: data, name: Config.config.balance.name}},
+	  pubnub.publish({channel: channel, message: {data: data, name: balance.name, port: balance.port}},
 	    function(s,r){}
 	  );
-          vals = data.split(/\s+/);
-	  if (vals.length == 4) {
-	    attrib = {quantity: vals[2], quantity_unit: vals[3]};
+	  attrib = balance.parse(data);
+	  if (attrib != undefined) {
 	    if (msg.hasOwnProperty('object')){
 	      object = msg.object;
 	      var ary = new Array(object.global_id, object.name, "->", attrib.quantity, attrib.quantity_unit);
@@ -82,7 +85,7 @@ pubnub.addListener({
 	      console.log("no object");  
 	    }
 	  } else {
-            console.log("vals.length =! 4");
+            console.log("can't get weight");
           }
 	});
       }
@@ -93,23 +96,6 @@ pubnub.addListener({
   status: function(s){
   }
 });
-
-//          sendSync(serial_port, 'S\r\n').then((data) => {
-//	    console.log(data);
-//            vals = data.split(/\s+/);
-//	    if (vals.length == 4){
-//	      var weight = vals[2];
-//	      var weight_unit = vals[3];
-//	      medusa.save_object(object, {quantity: weight, quantity_unit: weight_unit}, 
-//	        function(object){
-//	          publishData({'id': id, 'name': object.datum_attributes.name, 'weight': weight, 'weight_unit': weight_unit})
-//	        },
-//		function(err){
-//		});
-//	    } else {
-//	      publishData({error:'save failed'}) 
- //           }	
-  //        });
 
 console.log('Subscribing ' + channel + '...');
 pubnub.subscribe({channels:[channel]});
