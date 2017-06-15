@@ -90,13 +90,31 @@
           <div class="card-image"></div>
         </div>
       </div>
-      <div class="row u-mb20">
+      <!-- div class="row u-mb20">
         <div class="col s2 left">
           <a class="waves-effect waves-light btn-floating js-weigh disabled"><i class="material-icons">network_check</i></a>
         </div>
         <div class="col s10 left">
           <div class="balance"></div>
           <div class="weight"></div>
+        </div>
+      </div -->
+      <div class="row u-mb20">
+        <div class="col s2 left">
+          <a class="waves-effect waves-light btn-floating js-weigh0 disabled"><i class="material-icons">network_check</i></a>
+        </div>
+        <div class="col s10 left">
+          <div class="balance_0"></div>
+          <div class="weight_0"></div>
+        </div>
+      </div>
+      <div class="row u-mb20">
+        <div class="col s2 left">
+          <a class="waves-effect waves-light btn-floating js-weigh1 disabled"><i class="material-icons">network_check</i></a>
+        </div>
+        <div class="col s10 left">
+          <div class="balance_1"></div>
+          <div class="weight_1"></div>
         </div>
       </div>
       <div class="row u-mb20">
@@ -162,6 +180,8 @@
                $('.card-image').html("<img height=35 class='right' src='https://database.misasa.okayama-u.ac.jp" + medusa_obj.datum_attributes.primary_file_thumbnail_path + "'>")
                $('.js-label-print').removeClass('disabled');
                $('.js-weigh').removeClass('disabled');
+               $('.js-weigh0').removeClass('disabled');
+               $('.js-weigh1').removeClass('disabled');
                if ($("[name=auto_label]").prop("checked")){
                  print_label();
                }
@@ -173,8 +193,20 @@
              msg = message.message;
              if ("data" in msg){
                //$('.weight').html('<h5>' + msg.data + '</h5>');
-               $('.weight').html(msg.data);
-               $('.balance').html(msg.name);
+               console.log(msg);
+               if ("port" in msg){
+                 console.log(msg.port)
+                 if (msg.port == '/dev/ttyUSB0'){
+                   $('.weight_0').html(msg.data);
+                   $('.balance_0').html(msg.name);
+                 } else if (msg.port == '/dev/ttyUSB1'){
+                   $('.weight_1').html(msg.data);
+                   $('.balance_1').html(msg.name);                  
+                 }
+               } else {
+                 $('.weight').html(msg.data);
+                 $('.balance').html(msg.name);
+               }
              }
              if ("log" in msg){
                console.log(msg.log);
@@ -194,6 +226,8 @@
           $('.card-image').html("")
           $('.js-label-print').addClass('disabled');
           $('.js-weigh').addClass('disabled');
+          $('.js-weigh0').addClass('disabled');
+          $('.js-weigh1').addClass('disabled');          
         }
         
         console.log('Subscribing...');
@@ -201,7 +235,8 @@
          channels: ['weigh','weigh_console','rfcomm','medusa']
        });
 
-       pubnub.publish({channel : 'weigh', message : {command:'get_and_save'}}, function(s, r){});
+       pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0'}}, function(s, r){});
+       pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1'}}, function(s, r){});
       // Publisher
       $('.js-aircon-on').click(function() {
         console.log('on');
@@ -223,6 +258,22 @@
         var json = $('#dataJSON').html();
         var obj = $.parseJSON(json);
         pubnub.publish({channel : 'weigh', message : {command:'get_and_save', object: obj}}, function(status, response){});
+      });
+
+      $('.js-weigh0').click(function() {
+        console.log('weigh0...');
+        $('.weight0').html('----');
+        var json = $('#dataJSON').html();
+        var obj = $.parseJSON(json);
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0'}}, function(status, response){});
+      });
+
+      $('.js-weigh1').click(function() {
+        console.log('weigh0...');
+        $('.weight1').html('----');
+        var json = $('#dataJSON').html();
+        var obj = $.parseJSON(json);
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1'}}, function(status, response){});
       });
 
       $('.js-label-print').click(function() {
