@@ -7,6 +7,10 @@ config:
     auth:
       user: "admin"
       password: "admin"
+  tepra:
+    url: "http://172.24.1.121:8889/"
+    printer: "KING JIM SR5900P"
+    template: "18x18"
   balance:
     - name: "METTLER TOLEDO MS1602S"
       port: "/dev/ttyUSB0"
