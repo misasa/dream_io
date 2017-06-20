@@ -139,7 +139,17 @@
            var gid = obj.global_id;
            var name = obj.datum_attributes.name;
            console.log('ID: ' + gid + ' NAME: ' + name);
-           $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+           pubnub.publish({
+            channel : 'weigh_console', 
+            message : {command:'print', id: gid, name: name}},
+            function(s, r){}
+           );
+
+           // $.post('http://172.24.1.121:8889/print', {'data': gid + ',' + name})
+           // pubnub.publish({channel : 'weigh_console', message : 'print'}, function(status, response){
+           //   console.log(status, response);
+           //   console.log(status.statusCode);
+           // })
          }
        }
        // Publisher
@@ -231,12 +241,13 @@
         }
         
         console.log('Subscribing...');
-       pubnub.subscribe({
-         channels: ['weigh','weigh_console','rfcomm','medusa']
-       });
+        pubnub.subscribe({
+          channels: ['weigh','weigh_console','rfcomm','medusa']
+        });
 
-       pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0'}}, function(s, r){});
-       pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1'}}, function(s, r){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0'}}, function(s, r){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1'}}, function(s, r){});
+        pubnub.publish({channel : 'weigh_console', message : {command:'print', id:"111111", name: "test"}}, function(s, r){});
       // Publisher
       $('.js-aircon-on').click(function() {
         console.log('on');
