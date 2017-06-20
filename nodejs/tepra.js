@@ -11,8 +11,6 @@ var Tepra = function(config) {
     var param = {'UID': id, 'NAME': name};
     param['printer'] = config.printer;
     param['template'] = config.template;
-    #console.log('url: ' + url);
-    #console.log(param);
     this.client.get(url, {parameters: param}, function (data, response){
       if (response.statusCode != '200'){
         console.log('NG');
