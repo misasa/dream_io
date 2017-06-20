@@ -1,7 +1,9 @@
+var Tepra = require('./tepra');
 var PubNub = require('pubnub');
 var Config = require('config');
 var exec = require('child_process').exec;
 
+var tepra = new Tepra(Config.config.tepra);
 var pubnub = new PubNub(Config.config.pubnub);
 var channel = 'weigh_console';
 function publishData(data){
@@ -15,16 +17,20 @@ function publishData(data){
 
 pubnub.addListener({  
     message: function(m) {
-        // handle message
-        var msg = m.message; // The Payload
-        if (msg == 'restart'){
-          console.log('restarting...');
-		  exec('reboot', function(error, stdout, stderr){
-		    if (error != null){
-			  console.log(error);
-			}
-		  });
-        }
+      // handle message
+      var msg = m.message; // The Payload
+      if (msg == 'restart'){
+        console.log('restarting...');
+        exec('reboot', function(error, stdout, stderr){
+	  if (error != null){
+	    console.log(error);
+	  }
+	});
+      } else if (msg.command != undefined){
+        if (msg.command == 'print'){
+	  tepra.print(msg.id, msg.name);
+	}
+      }
     },
     presence: function(p) {
         // handle presence
