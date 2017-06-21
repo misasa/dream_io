@@ -1,4 +1,5 @@
 var Medusa = require('./medusa');
+var Tepra = require('./tepra');
 var PubNub = require('pubnub');
 var Config = require('config');
 var argv = require('minimist')(process.argv.slice(2));
@@ -17,6 +18,7 @@ var flag_medusa = true;
 if (argv['medusa'] == undefined){
   flag_medusa = false;
 }
+var tepra = new Tepra(Config.config.tepra);
 var medusa = new Medusa(Config.config.medusa);
 var pubnub = new PubNub(Config.config.pubnub);
 rfcomm.on('data',
@@ -35,9 +37,15 @@ rfcomm.on('data',
         console.log("getting...");
 	medusa.get_object(data.toString(),
 	  function (object){
-	    pubnub.publish({channel: channel, message: {'address': address, 'data' : data.toString(), 'medusa' : object}},
-	    function(status, response){}
-	    );
+        var id = object.global_id;
+        var name = object.datum_attributes.name;
+        if (Config.config.auto_label){
+          console.log('auto_label on...');
+          tepra.print(id, name);
+        } else {
+          console.log('auto_label off...');
+        }
+	    pubnub.publish({channel: channel, message: {'address': address, 'data' : data.toString(), 'medusa' : object}}, function(status, response){});
 	  });
       }
     }

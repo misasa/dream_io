@@ -28,7 +28,7 @@
     <nav class="gbl-nav u-mb20">
       <div class="nav-wrapper">
         <a href="#" class="brand-logo center">IMOKO-1</a>
-        <span class="switch right"><label>label on scan<input type="checkbox" name="auto_label" checked="checked"><span class="lever"></span></label></span>
+        <!-- span class="switch right"><label>label on scan<input type="checkbox" name="auto_label" checked="checked"><span class="lever"></span></label></span-->
       </div>
     </nav>
     <div>
@@ -186,9 +186,9 @@
                $('.js-weigh').removeClass('disabled');
                $('.js-weigh0').removeClass('disabled');
                $('.js-weigh1').removeClass('disabled');
-               if ($("[name=auto_label]").prop("checked")){
-                 print_label();
-               }
+//               if ($("[name=auto_label]").prop("checked")){
+//                 print_label();
+//               }
              } else {
                refresh_view();
              }
@@ -269,7 +269,7 @@
         $('.weight0').html('----');
         var json = $('#dataJSON').html();
         var obj = $.parseJSON(json);
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0'}}, function(status, response){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0', object: obj}}, function(status, response){});
       });
 
       $('.js-weigh1').click(function() {
@@ -277,7 +277,7 @@
         $('.weight1').html('----');
         var json = $('#dataJSON').html();
         var obj = $.parseJSON(json);
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1'}}, function(status, response){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1', object: obj}}, function(status, response){});
       });
 
       $('.js-label-print').click(function() {
