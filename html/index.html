@@ -200,10 +200,10 @@
                console.log(msg);
                if ("port" in msg){
                  console.log(msg.port)
-                 if (msg.port == '/dev/ttyUSB0'){
+                 if (msg.port == '/dev/balance0'){
                    $('.weight_0').html(msg.data);
                    $('.balance_0').html(msg.name);
-                 } else if (msg.port == '/dev/ttyUSB1'){
+                 } else if (msg.port == '/dev/balance1'){
                    $('.weight_1').html(msg.data);
                    $('.balance_1').html(msg.name);                  
                  }
@@ -239,8 +239,8 @@
           channels: ['weigh','weigh_console','rfcomm','medusa']
         });
 
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0'}}, function(s, r){});
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1'}}, function(s, r){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance0'}}, function(s, r){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance1'}}, function(s, r){});
       // Publisher
       $('.js-aircon-on').click(function() {
         console.log('on');
@@ -269,7 +269,7 @@
         $('.weight0').html('----');
         var json = $('#dataJSON').html();
         var obj = $.parseJSON(json);
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB0', object: obj}}, function(status, response){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance0', object: obj}}, function(status, response){});
       });
 
       $('.js-weigh1').click(function() {
@@ -277,7 +277,7 @@
         $('.weight1').html('----');
         var json = $('#dataJSON').html();
         var obj = $.parseJSON(json);
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/ttyUSB1', object: obj}}, function(status, response){});
+        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance1', object: obj}}, function(status, response){});
       });
 
       $('.js-label-print').click(function() {
