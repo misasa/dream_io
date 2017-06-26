@@ -80,3 +80,31 @@ Install and activate services as shown below.
 
 Revise configuration file (/srv/nodejs/config/default.yaml) when
 necessary.
+
+## Refer to USB port
+
+Name of device file by USB is temporal.  To refer to device on USB,
+make symbolic link to the device file, and refer to the link instead
+of device file from application.
+
+    $ sudo vi /etc/udev/rules.d/99-usb-serial.rules
+    $ cat /etc/udev/rules.d/99-usb-serial.rules
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="balance0"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0584", ATTRS{idProduct}=="b020", SYMLINK+="balance1"
+    $ cat config/default.yaml
+    config:
+      balance:
+        - name: "AND FG-30KBM"
+          port: "/dev/balance0"
+          options:
+            baudRate: 2400
+            dataBits: 7
+            parity: 'even'
+          delimiter: "\r\n"
+          command: "Q\r\n"
+        - name: "METTLER TOLEDO MS1602S"
+          port: "/dev/balance1"
+          options:
+            baudRate: 9600
+          delimiter: "\r\n"
+          command: "S\r\n"
