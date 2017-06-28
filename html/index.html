@@ -186,6 +186,7 @@
                $('.js-weigh').removeClass('disabled');
                $('.js-weigh0').removeClass('disabled');
                $('.js-weigh1').removeClass('disabled');
+               refresh_weigh();
 //               if ($("[name=auto_label]").prop("checked")){
 //                 print_label();
 //               }
@@ -233,14 +234,20 @@
           $('.js-weigh0').addClass('disabled');
           $('.js-weigh1').addClass('disabled');          
         }
+
+        refresh_weigh = function (){
+          console.log('weigh refreshing...')
+          pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance0'}}, function(s, r){});
+          pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance1'}}, function(s, r){});
+        }
         
         console.log('Subscribing...');
         pubnub.subscribe({
           channels: ['weigh','weigh_console','rfcomm','medusa']
         });
+        refresh_view();
+        refresh_weigh();
 
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance0'}}, function(s, r){});
-        pubnub.publish({channel : 'weigh', message : {command:'get_and_save', port:'/dev/balance1'}}, function(s, r){});
       // Publisher
       $('.js-aircon-on').click(function() {
         console.log('on');
