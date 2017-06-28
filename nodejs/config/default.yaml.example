@@ -13,13 +13,13 @@ config:
     template: "18x18"
   balance:
     - name: "METTLER TOLEDO MS1602S"
-      port: "/dev/ttyUSB0"
+      port: "/dev/balance1"
       options:
         baudRate: 9600
       delimiter: "\r\n"
       command: "S\r\n"
     - name: "AND FG-30KBM"
-      port: "/dev/ttyUSB1"
+      port: "/dev/balance0"
       options:
         baudRate: 2400
         dataBits: 7
