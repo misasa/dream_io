@@ -15,7 +15,7 @@ var Tepra = function(config) {
       if (response.statusCode != '200'){
         console.log('NG');
       }
-    })
+    }).on('error', function(err){console.log('tepra print error!')});
   }
 }
 
