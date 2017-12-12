@@ -67,6 +67,16 @@ Install and activate services as shown below.
     $ sudo cp -r ./nodejs /srv/
     $ sudo cp /srv/nodejs/config/default.yaml.example /srv/nodejs/config/default.yaml
     $ sudo cp ./udev/rules.d/rfcomm.rules /etc/udev/rurles.d/
+    $ sudo apt-get install nodejs npm
+    $ sudo npm cache clean
+    $ sudo npm install n -g
+    $ sudo n stable
+    $ sudo ln -sf /usr/local/bin/node /usr/bin/node
+    $ node -v
+    v9.2.1
+    $ sudo apt-get install libbluetooth-dev
+    $ cd /srv/nodejs
+    $ sudo npm install
     $ sudo cp ./systemd/system/nodejs_rfcomm.service /etc/systemd/system/
     $ sudo cp ./systemd/system/weigh.service /etc/systemd/system/
     $ sudo cp ./systemd/system/weigh_console.service /etc/systemd/system/
