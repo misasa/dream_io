@@ -59,6 +59,7 @@ pubnub.addListener({
 	  port = Object.keys(balances)[0];
 	  console.log("port (default):" + port);
 	}
+	if (port in balances){
 	var balance = balances[port];
 	balance.gets().then((data) => {
 	  console.log(data);
@@ -88,6 +89,7 @@ pubnub.addListener({
             console.log("can't get weight");
           }
 	});
+	};
       }
     }
   },
