@@ -2,29 +2,29 @@ DREAM-PI
 ====
 # Principle
 
-Specimen-ID is delivered from barcode reader to Medusa via following
-path.
-
-- CR 3500 (barcode reader) <Bluetooth> DREAM PI (pub_rfcomm.js)
-- DREAM PI (pub_rfcomm.js) <TCP/IP> Medusa
-
-Quantity of the specimen is delivered from balance to Medusa via
+Specimen-ID is delivered from barcode reader to Medusa and Imoko via
 following path.
+
+- CR 3500 (barcode reader) <bluetooth> DREAM PI (pub_rfcomm.js)
+- DREAM PI (pub_rfcomm.js) <TCP/IP> Medusa
+- DREAM PI (pub_rfcomm.js) <PubNub> Imoko
+
+Quantity of the specimen is delivered from balance to Medusa and Imoko
+via following path.
 
 - MS 16002S (balance) <RS232C/USB> DREAM PI
 - DREAM PI (weigh.js) <TCP/IP> Medusa
+- DREAM PI (weigh.js) <PubNub> Imoko
 
 To ensure reliable connection between DREAM PI and Bluetooth, we
-encourage user to restart DREAM PI before operation.  To restart DREAM
-IO, following application runs on DREAM PI.
+encourage an user to restart DREAM PI before operation.  To restart DREAM
+PI, make sure if following application runs on DREAM PI.
 
 - DREAM PI (weigh_console.js)
 
 The process can be monitored by web server referred as Imoko that runs
-on http://devel.misasa.okayama-u.ac.jp/io/.  This interface also lets
-user restart the DREAM PI.
-
-- devel.misasa.okayama-u.ac.jp (DREAM manager, /io/index.html)
+on http://devel.misasa.okayama-u.ac.jp/io/.  Practically this is the
+only interface that lets an user restart DREAM PI.
 
 # Operation manual
 
@@ -43,9 +43,12 @@ As of May 24, 2017, Code CR 2500, CR 3500 and CR 2600 are supported.
 Note that before for the first connection, pincode authorization is
 required for each device.
 
-## METTLER TOLEDO MS1602S (balance)
+## METTLER TOLEDO MS1602S (light balance)
 
 Enable communication using RS-232C.  Turn on `HOST` mode.
+
+## AND FG-30KBM (heavy balance)
+
 
 ## DREAM PI (Raspberry Pi)
 
