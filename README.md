@@ -49,6 +49,7 @@ Enable communication using RS-232C.  Turn on `HOST` mode.
 
 ## AND FG-30KBM (heavy balance)
 
+Enable comunication using RS-232C. Turn on `COMMAND` mode.
 
 ## DREAM PI (Raspberry Pi)
 
