@@ -26,7 +26,7 @@ The process can be monitored by web server referred as Imoko that runs
 on http://devel.misasa.okayama-u.ac.jp/io/.  Practically this is the
 only interface that lets an user restart DREAM PI.
 
-# Operation manual
+# Operation
 
 1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
 2. Click Start to reboot DREAM PI.
@@ -35,7 +35,7 @@ only interface that lets an user restart DREAM PI.
 5. Put a specimen.
 6. Push Weigh button.  Confirm if quantity was updated.
 
-# Configuration
+# Configure a DREAM PI
 
 ## Barcode reader
 
@@ -43,21 +43,23 @@ As of May 24, 2017, Code CR 2500, CR 3500 and CR 2600 are supported.
 Note that before for the first connection, pincode authorization is
 required for each device.
 
-## METTLER TOLEDO MS1602S (light balance)
+## Balance (METTLER TOLEDO MS1602S)
 
 Enable communication using RS-232C.  Turn on `HOST` mode.
 
-## AND FG-30KBM (heavy balance)
+## Balance (AND FG-30KBM)
 
 Enable comunication using RS-232C. Turn on `COMMAND` mode.
 
-## DREAM PI (Raspberry Pi)
+## Computer (Raspberry Pi)
 
-DREAM PI listens two devices as shown below.
+Computer (Raspberry Pi) listens two devices as shown below.
 
-- listen `rfcomm0': Receive specimen-ID from barcode reader via
+- listen `rfcomm0`: Receive specimen-ID from barcode reader via
   Bluetooth.
-- listen `ttyUSB0': Receive weight from balance via RS232C.
+- listen `ttyUSB`?: Receive weight from a balance
+  (METTLER TOLEDO MS1602S or AND FG-30KBM) via RS232C.
+- talk to `PubNub` with publishkey xxxyyyzzz: Imoko listens `PubNub` with subscribeKey aaabbbccc.
 
 Install and activate services as shown below.
 
@@ -95,11 +97,14 @@ Install and activate services as shown below.
 Revise configuration file (/srv/nodejs/config/default.yaml) when
 necessary.
 
-## Refer to USB port
+## RS232C connection
 
-Name of device file by USB is temporal.  To refer to device on USB,
-make symbolic link to the device file, and refer to the link instead
-of device file from application.
+The balances should talk to the computer by USB via RS232C.  A
+RS232C-USB converter (REX-USB60F) should be installed.
+
+Name of the USB device file is temporal and fragile.  To talk to
+the balances, make a symbolic link to the device file dynamically, and
+refer to the link instead of the device file from application.
 
     $ sudo vi /etc/udev/rules.d/99-usb-serial.rules
     $ cat /etc/udev/rules.d/99-usb-serial.rules
