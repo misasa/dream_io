@@ -55,29 +55,38 @@ Enable `COMMAND` mode to communicate using RS-232C.
 
 ## Imoko (web page)
 
-When weight button is pressed, via TCP/IP, Imoko (web page) reads specimen-ID and
-weight on `PubNub` channels a and b. Then Imoko (web page) asks computer
-(Raspberry Pi) to update weight of specimen with the specimen-ID on
-Medusa.
+When there is a target input via TCP/IP on `PubNub` channel a, that is
+a specimen with ID and name, show the target specimen.
+
+When weight button is pressed, via TCP/IP, Imoko (web page) reads
+weight on `PubNub` channel b and show the quantity.  Then Imoko (web
+page) asks computer (Raspberry Pi) to update quantity of the specimen
+with the specimen-ID on Medusa.
+
+Copy the template HTML file to appropriate location.
 
 ## Computer (Raspberry Pi)
 
-Computer (Raspberry Pi) talks with devices via device files of `Bluetooth` and
-`USB`, with Imoko (web page) via TCP/IP, and with Medusa via TCP/IP.
+### Overview
 
-- Barcode reader: Via device file `/dev/rfcomm0`, computer (Raspberry
-  Pi) receives specimen-ID from barcode reader through Bluetooth and
-  publishes it to `PubNub` channel-a.
-- Balances: Via device files `/dev/ttyUSB`?, computer (Raspberry Pi)
-  receives weight from balances (METTLER TOLEDO MS1602S or/and AND
-  FG-30KBM) through RS232C and publishes it to `PubNub` channel-b.
+Computer (Raspberry Pi) talks with barcode reader and balances via
+device files of `Bluetooth` and `USB`, with Imoko (web page) via
+`PubNub`, and with Medusa via TCP/IP.
 
+- Barcode reader: Via device file `/dev/rfcomm0`,
+  computer (Raspberry Pi) receives specimen-ID from barcode reader
+  through Bluetooth and publishes it to `PubNub` channel-a.  Via
+  TCP/IP, computer asks Medusa to solve specimen-ID.
+- Balances: Via device files `/dev/ttyUSB`?, computer
+  (Raspberry Pi) receives weight from balances (METTLER TOLEDO MS1602S
+  or/and AND FG-30KBM) through RS232C and publishes it to `PubNub`
+  channel-b.  Via TCP/IP, computer updates quantity of a specimen with
+  the specimen-ID on Medusa.
 
-# Configure a DREAM PI
+### Configure services
 
-## Services
-
-Install and activate services as shown below.
+Install and activate services as shown below.  Revise configuration
+file (/srv/nodejs/config/default.yaml) when necessary.
 
     $ lsb_release -a
     Distributor ID: Raspbian
@@ -110,10 +119,8 @@ Install and activate services as shown below.
     $ sudo systemctl start weigh.service
     $ sudo systemctl start weigh_console.service
 
-Revise configuration file (/srv/nodejs/config/default.yaml) when
-necessary.
 
-## RS232C-USB connection
+### Configure USB-RS232C connection
 
 The balances should talk to the computer by USB via RS232C.  A
 RS232C-USB converter (REX-USB60F) should be installed.
