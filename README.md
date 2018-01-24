@@ -5,20 +5,20 @@ DREAM-PI
 Specimen-ID is delivered from barcode reader to Imoko (web page) and Medusa via
 following path.
 
-- CR 3500 (barcode reader) [bluetooth] DREAM PI (pub_rfcomm.js)
-- DREAM PI (pub_rfcomm.js) [PubNub] Imoko (web page)
-- DREAM PI (pub_rfcomm.js) [TCP/IP] Medusa
+- CR 3500 (barcode reader) [bluetooth] DREAM-PI (pub_rfcomm.js)
+- DREAM-PI (pub_rfcomm.js) [PubNub] Imoko (web page)
+- DREAM-PI (pub_rfcomm.js) [TCP/IP] Medusa
 
 Quantity of the specimen is delivered from balances to Imoko (web page) and Medusa
 via following path.
 
-- MS 16002S (balance) [RS232C/USB] DREAM PI
-- DREAM PI (weigh.js) [PubNub] Imoko (web page)
-- DREAM PI (weigh.js) [TCP/IP] Medusa
+- MS 16002S (balance) [RS232C/USB] DREAM-PI
+- DREAM-PI (weigh.js) [PubNub] Imoko (web page)
+- DREAM-PI (weigh.js) [TCP/IP] Medusa
 
-To ensure reliable connection between DREAM PI and Bluetooth, we
-encourage an user to restart DREAM PI before operation.  To restart DREAM
-PI, make sure if a process `weigh_console.js` is running on DREAM PI.
+To ensure reliable connection between DREAM-PI and Bluetooth, we
+encourage an user to restart DREAM-PI before operation.  To restart DREAM
+PI, make sure if a process `weigh_console.js` is running on DREAM-PI.
 
 The process can be monitored by web page referred as `Imoko` (web
 page) that runs on http://devel.misasa.okayama-u.ac.jp/io/.
@@ -28,7 +28,7 @@ PI.
 # Operation
 
 1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
-2. Click Start to reboot DREAM PI.
+2. Click Start to reboot DREAM-PI.
 3. Scan connection code to hear beep twice.
 4. Scan specimen-ID.
 5. Put a specimen on a balance.
