@@ -2,37 +2,41 @@ DREAM-PI
 ====
 # Principle
 
-Specimen-ID is delivered from barcode reader to Imoko (web page) and Medusa via
+DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
+barcode reader, balances, and NFC reader/writer.  As of January 25,
+2018, we use computer (Raspberry Pi) as an infrastructure.
+
+As an example of applications of DREAM-PI, we develop a web interface
+named Imoko.  He transfers quantity of a specimen weighted in balance
+into Medusa using DREAM-PI.
+
+Specimen-ID is delivered from barcode reader to Imoko (web interface) and Medusa via
 following path.
 
 - CR 3500 (barcode reader) [bluetooth] DREAM-PI (pub_rfcomm.js)
-- DREAM-PI (pub_rfcomm.js) [PubNub] Imoko (web page)
+- DREAM-PI (pub_rfcomm.js) [PubNub] Imoko (web interface)
 - DREAM-PI (pub_rfcomm.js) [TCP/IP] Medusa
 
-Quantity of the specimen is delivered from balances to Imoko (web page) and Medusa
+Quantity of the specimen is delivered from balance to Imoko (web interface) and Medusa
 via following path.
 
 - MS 16002S (balance) [RS232C/USB] DREAM-PI
-- DREAM-PI (weigh.js) [PubNub] Imoko (web page)
+- DREAM-PI (weigh.js) [PubNub] Imoko (web interface)
 - DREAM-PI (weigh.js) [TCP/IP] Medusa
 
 To ensure reliable connection between DREAM-PI and Bluetooth, we
-encourage an user to restart DREAM-PI before operation.  To restart DREAM
-PI, make sure if a process `weigh_console.js` is running on DREAM-PI.
+encourage an user to restart DREAM-PI before operation.
 
-The process can be monitored by web page referred as `Imoko` (web
-page) that runs on http://devel.misasa.okayama-u.ac.jp/io/.
-Practically this is the only interface that lets an user restart DREAM
-PI.
+
 
 # Operation
 
-1. Open web page http://devel.misasa.okayama-u.ac.jp/io/.
-2. Click Start to reboot DREAM-PI.
+1. Open Imoko (web interface) http://devel.misasa.okayama-u.ac.jp/io/.
+2. Click `Start` to reboot DREAM-PI.
 3. Scan connection code to hear beep twice.
 4. Scan specimen-ID.
 5. Put a specimen on a balance.
-6. Push Weigh button.  Confirm if quantity was updated.
+6. Push `Weigh` button.  Confirm if quantity was updated.
 
 # Description
 
@@ -42,7 +46,7 @@ with two balances and one barcode reader at once.
 ## Barcode reader
 
 As of May 24, 2017, Code CR 2500, CR 3500 and CR 2600 are supported.
-Note that before for the first connection, pincode authorization is
+Note that before for the first connection, authorization is
 required for each device.
 
 ## Balance (METTLER TOLEDO MS1602S)
@@ -53,25 +57,13 @@ Enable `HOST` mode to communicate using RS-232C.
 
 Enable `COMMAND` mode to communicate using RS-232C.
 
-## Imoko (web page)
-
-When there is a target input via TCP/IP on `PubNub` channel a, that is
-a specimen with ID and name, show the target specimen.
-
-When weight button is pressed, via TCP/IP, Imoko (web page) reads
-weight on `PubNub` channel b and show the quantity.  Then Imoko (web
-page) asks computer (Raspberry Pi) to update quantity of the specimen
-with the specimen-ID on Medusa.
-
-Copy the template HTML file to appropriate location.
-
 ## Computer (Raspberry Pi)
 
 ### Overview
 
-Computer (Raspberry Pi) talks with barcode reader and balances via
-device files of `Bluetooth` and `USB`, with Imoko (web page) via
-`PubNub`, and with Medusa via TCP/IP.
+Computer (Raspberry Pi) talks to barcode reader and balances via
+device files of `Bluetooth` and `USB`, to channels by `PubNub`, and to
+Medusa via TCP/IP.
 
 - Barcode reader: Via device file `/dev/rfcomm0`,
   computer (Raspberry Pi) receives specimen-ID from barcode reader
@@ -150,3 +142,15 @@ refer to the link instead of the device file from application.
             baudRate: 9600
           delimiter: "\r\n"
           command: "S\r\n"
+
+## Imoko (web interface)
+
+Imoko (web interface) monitors a specimen message via TCP/IP on
+`PubNub` channel a, that consists of ID and name, and shows the
+specimen ID and the name.
+
+Imoko (web interface) reads a weight message via TCP/IP on `PubNub`
+channel b when `Weight` button is pressed, and shows the weight.
+
+Then Imoko (web page) asks computer (Raspberry Pi) to update the
+weight of the specimen on Medusa.
