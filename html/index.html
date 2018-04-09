@@ -146,6 +146,9 @@
            );
          }
        }
+       show_log = function (log){
+         $('#messages').prepend($('<li class="collection-item">').text(log));
+       } 
        // Publisher
        pubnub = new PubNub({
          publishKey : 'pub-c-a7b58778-6fff-43b8-b87b-cf4771c8ed6c',
@@ -161,6 +164,13 @@
                $('.js-state-output').html(state)
                $('.js-aircon-on').removeClass('disabled');
                refresh_view();
+             }
+             if ("log" in msg){
+               show_log(msg.log);
+             }
+             if ("tepra" in msg){
+               $('.obj-id').html(msg.tepra.printer);
+               $('.obj-name').html(msg.tepra.template);
              }
            } else if (message.channel == 'rfcomm'){
              obj = message.message;
@@ -214,8 +224,9 @@
                }
              }
              if ("log" in msg){
-               console.log(msg.log);
-               $('#messages').prepend($('<li class="collection-item">').text(msg.log));
+               //console.log(msg.log);
+               show_log(msg.log);
+               //$('#messages').prepend($('<li class="collection-item">').text(msg.log));
              }
            } else {
 	         obj = message.message;
@@ -225,6 +236,7 @@
        });
         refresh_view = function (){
           console.log('refreshing...');
+          pubnub.publish({channel : 'weigh_console', message : {command:'status'}}, function(status, response){});
           $('#dataJSON').html("");
           $('.obj-id').html("");        
           $('.obj-name').html("");
@@ -247,7 +259,6 @@
         });
         refresh_view();
         refresh_weigh();
-
       // Publisher
       $('.js-aircon-on').click(function() {
         console.log('on');
