@@ -14,7 +14,13 @@ function publishData(data){
     }
   );
 }
-
+function publishLog(txt){
+  console.log("publishing log...");
+  pubnub.publish(
+    {channel: channel, message: {log: txt}},
+    function(s,r){console.log(s)}
+  );
+}
 pubnub.addListener({  
     message: function(m) {
       // handle message
@@ -28,7 +34,13 @@ pubnub.addListener({
 	});
       } else if (msg.command != undefined){
         if (msg.command == 'print'){
+	  //publishLog("printing..." + tepra.printer);
 	  tepra.print(msg.id, msg.name);
+	} else if (msg.command == 'status'){
+	  pubnub.publish(
+	    {channel: channel, message: {tepra: {printer: tepra.printer, template: tepra.template}}},
+	    function(s,r){}
+	  )
 	}
       }
     },
