@@ -125,9 +125,31 @@ refer to the link instead of the device file from application.
     $ cat /etc/udev/rules.d/99-usb-serial.rules
     SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="balance0"
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0584", ATTRS{idProduct}=="b020", SYMLINK+="balance1"
-    $ cat config/default.yaml
+
+
+### Example of configuration file
+
+    $ cat nodejs/config/default.yaml
     config:
+      pubnub:
+        publishKey: "demo"
+        subscribeKey: "demo"
+      medusa:
+        url: "http://dream.misasa.okayama-u.ac.jp/demo/"
+        auth:
+          user: "admin"
+          password: "admin"
+      tepra:
+        url: "http://172.24.1.121:8889/"
+        printer: "KING JIM SR5900P"
+        template: "18x18"
       balance:
+        - name: "METTLER TOLEDO MS1602S"
+          port: "/dev/balance1"
+          options:
+            baudRate: 9600
+          delimiter: "\r\n"
+          command: "S\r\n"
         - name: "AND FG-30KBM"
           port: "/dev/balance0"
           options:
@@ -136,12 +158,6 @@ refer to the link instead of the device file from application.
             parity: 'even'
           delimiter: "\r\n"
           command: "Q\r\n"
-        - name: "METTLER TOLEDO MS1602S"
-          port: "/dev/balance1"
-          options:
-            baudRate: 9600
-          delimiter: "\r\n"
-          command: "S\r\n"
 
 ## Imoko (web interface)
 

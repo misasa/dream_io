@@ -15,72 +15,89 @@
 
 <h1>Principle</h1>
 
-<p>Specimen-ID is delivered from barcode reader to Medusa via following
-path.</p>
+<p>DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
+barcode reader, balances, and NFC reader/writer.  As of January 25,
+2018, we use computer (Raspberry Pi) as an infrastructure.</p>
 
-<ul>
-<li>CR 3500 (barcode reader) <Bluetooth> DREAM PI (pub_rfcomm.js)</li>
-<li>DREAM PI (pub_rfcomm.js) <TCP/IP> Medusa</li>
-</ul>
+<p>As an example of applications of DREAM-PI, we develop a web interface
+named Imoko.  He transfers quantity of a specimen weighted in balance
+into Medusa using DREAM-PI.</p>
 
-<p>Quantity of the specimen is delivered from balance to Medusa via
+<p>Specimen-ID is delivered from barcode reader to Imoko (web interface) and Medusa via
 following path.</p>
 
 <ul>
-<li>MS 16002S (balance) <RS232C/USB> DREAM PI</li>
-<li>DREAM PI (weigh.js) <TCP/IP> Medusa</li>
+<li>CR 3500 (barcode reader) [bluetooth] DREAM-PI (pub_rfcomm.js)</li>
+<li>DREAM-PI (pub_rfcomm.js) [PubNub] Imoko (web interface)</li>
+<li>DREAM-PI (pub_rfcomm.js) [TCP/IP] Medusa</li>
 </ul>
 
-<p>To ensure reliable connection between DREAM PI and Bluetooth, we
-encourage user to restart DREAM PI before operation.  To restart DREAM
-IO, following application runs on DREAM PI.</p>
+<p>Quantity of the specimen is delivered from balance to Imoko (web interface) and Medusa
+via following path.</p>
 
 <ul>
-<li>DREAM PI (weigh_console.js)</li>
+<li>MS 16002S (balance) [RS232C/USB] DREAM-PI</li>
+<li>DREAM-PI (weigh.js) [PubNub] Imoko (web interface)</li>
+<li>DREAM-PI (weigh.js) [TCP/IP] Medusa</li>
 </ul>
 
-<p>The process can be monitored by web server referred as Imoko that runs
-on http://devel.misasa.okayama-u.ac.jp/io/.  This interface also lets
-user restart the DREAM PI.</p>
+<p>To ensure reliable connection between DREAM-PI and Bluetooth, we
+encourage an user to restart DREAM-PI before operation.</p>
 
-<ul>
-<li>devel.misasa.okayama-u.ac.jp (DREAM manager, /io/index.html)</li>
-</ul>
-
-<h1>Operation manual</h1>
+<h1>Operation</h1>
 
 <ol>
-<li>Open web page http://devel.misasa.okayama-u.ac.jp/io/.</li>
-<li>Click Start to reboot DREAM PI.</li>
+<li>Open Imoko (web interface) http://devel.misasa.okayama-u.ac.jp/io/.</li>
+<li>Click <code>Start</code> to reboot DREAM-PI.</li>
 <li>Scan connection code to hear beep twice.</li>
 <li>Scan specimen-ID.</li>
-<li>Put a specimen.</li>
-<li>Push Weigh button.  Confirm if quantity was updated.</li>
+<li>Put a specimen on a balance.</li>
+<li>Push <code>Weigh</code> button.  Confirm if quantity was updated.</li>
 </ol>
 
-<h1>Configuration</h1>
+<h1>Description</h1>
+
+<p>As of January 19, 2018, one computer (Raspberry Pi) can communicate
+with two balances and one barcode reader at once.</p>
 
 <h2>Barcode reader</h2>
 
 <p>As of May 24, 2017, Code CR 2500, CR 3500 and CR 2600 are supported.
-Note that before for the first connection, pincode authorization is
+Note that before for the first connection, authorization is
 required for each device.</p>
 
-<h2>METTLER TOLEDO MS1602S (balance)</h2>
+<h2>Balance (METTLER TOLEDO MS1602S)</h2>
 
-<p>Enable communication using RS-232C.  Turn on <code>HOST</code> mode.</p>
+<p>Enable <code>HOST</code> mode to communicate using RS-232C.</p>
 
-<h2>DREAM PI (Raspberry Pi)</h2>
+<h2>Balance (AND FG-30KBM)</h2>
 
-<p>DREAM PI listens two devices as shown below.</p>
+<p>Enable <code>COMMAND</code> mode to communicate using RS-232C.</p>
+
+<h2>Computer (Raspberry Pi)</h2>
+
+<h3>Overview</h3>
+
+<p>Computer (Raspberry Pi) talks to barcode reader and balances via
+device files of <code>Bluetooth</code> and <code>USB</code>, to channels by <code>PubNub</code>, and to
+Medusa via TCP/IP.</p>
 
 <ul>
-<li>listen `rfcomm0': Receive specimen-ID from barcode reader via
-Bluetooth.</li>
-<li>listen `ttyUSB0': Receive weight from balance via RS232C.</li>
+<li>Barcode reader: Via device file <code>/dev/rfcomm0</code>,
+computer (Raspberry Pi) receives specimen-ID from barcode reader
+through Bluetooth and publishes it to <code>PubNub</code> channel-a.  Via
+TCP/IP, computer asks Medusa to solve specimen-ID.</li>
+<li>Balances: Via device files <code>/dev/ttyUSB</code>?, computer
+(Raspberry Pi) receives weight from balances (METTLER TOLEDO MS1602S
+or/and AND FG-30KBM) through RS232C and publishes it to <code>PubNub</code>
+channel-b.  Via TCP/IP, computer updates quantity of a specimen with
+the specimen-ID on Medusa.</li>
 </ul>
 
-<p>Install and activate services as shown below.</p>
+<h3>Configure services</h3>
+
+<p>Install and activate services as shown below.  Revise configuration
+file (/srv/nodejs/config/default.yaml) when necessary.</p>
 
 <pre><code>$ lsb_release -a
 Distributor ID: Raspbian
@@ -92,6 +109,16 @@ $ cd dream_io
 $ sudo cp -r ./nodejs /srv/
 $ sudo cp /srv/nodejs/config/default.yaml.example /srv/nodejs/config/default.yaml
 $ sudo cp ./udev/rules.d/rfcomm.rules /etc/udev/rurles.d/
+$ sudo apt-get install nodejs npm
+$ sudo npm cache clean
+$ sudo npm install n -g
+$ sudo n stable
+$ sudo ln -sf /usr/local/bin/node /usr/bin/node
+$ node -v
+v9.2.1
+$ sudo apt-get install libbluetooth-dev
+$ cd /srv/nodejs
+$ sudo npm install
 $ sudo cp ./systemd/system/nodejs_rfcomm.service /etc/systemd/system/
 $ sudo cp ./systemd/system/weigh.service /etc/systemd/system/
 $ sudo cp ./systemd/system/weigh_console.service /etc/systemd/system/
@@ -104,22 +131,44 @@ $ sudo systemctl start weigh.service
 $ sudo systemctl start weigh_console.service
 </code></pre>
 
-<p>Revise configuration file (/srv/nodejs/config/default.yaml) when
-necessary.</p>
+<h3>Configure USB-RS232C connection</h3>
 
-<h2>Refer to USB port</h2>
+<p>The balances should talk to the computer by USB via RS232C.  A
+RS232C-USB converter (REX-USB60F) should be installed.</p>
 
-<p>Name of device file by USB is temporal.  To refer to device on USB,
-make symbolic link to the device file, and refer to the link instead
-of device file from application.</p>
+<p>Name of the USB device file is temporal and fragile.  To talk to
+the balances, make a symbolic link to the device file dynamically, and
+refer to the link instead of the device file from application.</p>
 
 <pre><code>$ sudo vi /etc/udev/rules.d/99-usb-serial.rules
 $ cat /etc/udev/rules.d/99-usb-serial.rules
 SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="balance0"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0584", ATTRS{idProduct}=="b020", SYMLINK+="balance1"
-$ cat config/default.yaml
+</code></pre>
+
+<h3>Example of configuration file</h3>
+
+<pre><code>$ cat nodejs/config/default.yaml
 config:
+  pubnub:
+    publishKey: "demo"
+    subscribeKey: "demo"
+  medusa:
+    url: "http://dream.misasa.okayama-u.ac.jp/demo/"
+    auth:
+      user: "admin"
+      password: "admin"
+  tepra:
+    url: "http://172.24.1.121:8889/"
+    printer: "KING JIM SR5900P"
+    template: "18x18"
   balance:
+    - name: "METTLER TOLEDO MS1602S"
+      port: "/dev/balance1"
+      options:
+        baudRate: 9600
+      delimiter: "\r\n"
+      command: "S\r\n"
     - name: "AND FG-30KBM"
       port: "/dev/balance0"
       options:
@@ -128,13 +177,19 @@ config:
         parity: 'even'
       delimiter: "\r\n"
       command: "Q\r\n"
-    - name: "METTLER TOLEDO MS1602S"
-      port: "/dev/balance1"
-      options:
-        baudRate: 9600
-      delimiter: "\r\n"
-      command: "S\r\n"
 </code></pre>
+
+<h2>Imoko (web interface)</h2>
+
+<p>Imoko (web interface) monitors a specimen message via TCP/IP on
+<code>PubNub</code> channel a, that consists of ID and name, and shows the
+specimen ID and the name.</p>
+
+<p>Imoko (web interface) reads a weight message via TCP/IP on <code>PubNub</code>
+channel b when <code>Weight</code> button is pressed, and shows the weight.</p>
+
+<p>Then Imoko (web page) asks computer (Raspberry Pi) to update the
+weight of the specimen on Medusa.</p>
 
 </body>
 </html>
