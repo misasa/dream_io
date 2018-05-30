@@ -37,16 +37,37 @@ rfcomm.on('data',
         console.log("getting...");
 	medusa.get_object(data.toString(),
 	  function (object){
-        var id = object.global_id;
-        var name = object.datum_attributes.name;
-        if (Config.config.auto_label){
-          console.log('auto_label on...');
-          tepra.print(id, name);
-        } else {
-          console.log('auto_label off...');
-        }
-	    pubnub.publish({channel: channel, message: {'address': address, 'data' : data.toString(), 'medusa' : object}}, function(status, response){});
-	  });
+            var id = object.global_id;
+            var name = object.datum_attributes.name;
+            if (Config.config.auto_label){
+              console.log('auto_label on...');
+              tepra.print(id, name);
+            } else {
+              console.log('auto_label off...');
+            }
+	    pubnub.publish({
+	                     channel: channel, 
+			     message: {
+			               'address': address, 
+			               'data' : data.toString(), 
+				       'medusa' : object
+				      }
+		           },
+		           function(status, response){}
+			  );
+	 },
+	 function (e){
+	   pubnub.publish(
+	     {channel: channel,
+	      message: {'log': e.toString()}
+	     },
+	     function(s,r){
+	       console.log(s);
+	       console.log(r);
+	     }
+	   );
+	 }
+       );
       }
     }
 
