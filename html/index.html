@@ -156,6 +156,9 @@
        })
        pubnub.addListener({
          message: function(message) {
+           if ("log" in message.message){
+             show_log(message.message.log);
+           }
            if (message.channel == 'weigh_console') {
              msg = message.message;
              console.log(msg);
@@ -164,9 +167,6 @@
                $('.js-state-output').html(state)
                $('.js-aircon-on').removeClass('disabled');
                refresh_view();
-             }
-             if ("log" in msg){
-               show_log(msg.log);
              }
              if ("tepra" in msg){
                $('.obj-id').html(msg.tepra.printer);
@@ -222,11 +222,6 @@
                  $('.weight').html(msg.data);
                  $('.balance').html(msg.name);
                }
-             }
-             if ("log" in msg){
-               //console.log(msg.log);
-               show_log(msg.log);
-               //$('#messages').prepend($('<li class="collection-item">').text(msg.log));
              }
            } else {
 	         obj = message.message;
