@@ -1,12 +1,10 @@
 DREAM-PI
+
+DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
+barcode reader, balances, and NFC reader/writer.
+
 ====
 # Description
-
-As of January 19, 2018, one computer (Raspberry Pi) can communicate
-with two balances and one barcode reader at once.
-
-# Principle
-
 DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
 barcode reader, balances, and NFC reader/writer.  As of January 25,
 2018, we use computer (Raspberry Pi) as an infrastructure.
@@ -14,6 +12,11 @@ barcode reader, balances, and NFC reader/writer.  As of January 25,
 As an example of applications of DREAM-PI, we develop a web interface
 named Imoko.  He transfers quantity of a specimen weighted in balance
 into Medusa using DREAM-PI.
+
+As of January 19, 2018, one computer (Raspberry Pi) can communicate
+with two balances and one barcode reader at once.
+
+# Principle
 
 Specimen-ID is delivered from barcode reader to Imoko (web interface) and Medusa via
 following path.
