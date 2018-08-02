@@ -1,5 +1,10 @@
 DREAM-PI
 ====
+# Description
+
+As of January 19, 2018, one computer (Raspberry Pi) can communicate
+with two balances and one barcode reader at once.
+
 # Principle
 
 DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
@@ -37,11 +42,6 @@ encourage an user to restart DREAM-PI before operation.
 4. Scan specimen-ID.
 5. Put a specimen on a balance.
 6. Push `Weigh` button.  Confirm if quantity was updated.
-
-# Description
-
-As of January 19, 2018, one computer (Raspberry Pi) can communicate
-with two balances and one barcode reader at once.
 
 ## Barcode reader
 
