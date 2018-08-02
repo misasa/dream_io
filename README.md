@@ -3,7 +3,6 @@
 DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
 barcode reader, balances, and NFC reader/writer.
 
-====
 # Description
 DREAM-PI is a device that provides PubNub interfaces https://www.pubnub.com/ to
 barcode reader, balances, and NFC reader/writer.  As of January 25,
